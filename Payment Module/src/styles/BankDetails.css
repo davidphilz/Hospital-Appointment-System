@@ -1,0 +1,48 @@
+.bank-details-container {
+  max-width: 600px;
+  margin: 40px auto;
+  padding: 20px;
+  background: #f9f9f9;
+  border-radius: 8px;
+  font-family: Arial, sans-serif;
+  text-align: center;
+}
+
+.bank-details-container h2 {
+  margin-bottom: 20px;
+}
+
+.bank-details-container form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.bank-details-container input {
+  padding: 10px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.bank-details-container button {
+  padding: 10px;
+  background-color: #1976d2;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.bank-details-container button:hover {
+  background-color: #1258a7;
+}
+
+.error-message {
+  color: red;
+}
+
+.status-message {
+  color: green;
+}
