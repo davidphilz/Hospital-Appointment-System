@@ -2,7 +2,7 @@
 $host = "localhost";
 $user = "root";
 $password = "";
-$dbname = "resource";
+$dbname = "hospital_appointment_system";
 
 $connect = mysqli_connect($host, $user, $password, $dbname);
 if (!$connect) {

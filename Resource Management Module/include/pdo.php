@@ -1,6 +1,6 @@
 <?php
 $host = "localhost";
-$db   = "resource";
+$db   = "hospital_appointment_system";
 $user = "root";
 $pass = "";
 $charset = 'utf8mb4';

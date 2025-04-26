@@ -2,7 +2,7 @@
 session_start();
 include("../include/header.php");
 try {
-    $pdo = new PDO('mysql:host=localhost;dbname=resource;charset=utf8mb4', 'root', '', [
+    $pdo = new PDO('mysql:host=localhost;dbname=hospital_appointment_system;charset=utf8mb4', 'root', '', [
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
     ]);
 } catch (PDOException $e) {
