@@ -237,7 +237,6 @@ include("../include/connection.php");
                       <?php include 'getTotalIncome.php'; ?>
                     </div>
                   </div>
-                  <i class="fas fa-dollar-sign"></i>
                 </div>
               </div>
             </div>
@@ -265,51 +264,63 @@ include("../include/connection.php");
       </div> 
     </div> 
   </div>
+
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"></script>
+
   <script>
-    let currentDate = new Date();
-    const renderCalendar = (dateObj) => {
-      const calendarDates = document.getElementById("calendar-dates");
-      const monthYear = document.getElementById("month-year");
+  document.addEventListener("DOMContentLoaded", function() {
+    const calendarDates = document.getElementById("calendar-dates");
+    const monthYear     = document.getElementById("month-year");
+    const prevBtn       = document.getElementById("prev-month");
+    const nextBtn       = document.getElementById("next-month");
+    let currentDate     = new Date();
+
+    function renderCalendar(dateObj) {
       calendarDates.innerHTML = "";
-      const year = dateObj.getFullYear();
+      const year  = dateObj.getFullYear();
       const month = dateObj.getMonth();
-      const firstDayOfMonth = new Date(year, month, 1).getDay();
-      const lastDateOfMonth = new Date(year, month + 1, 0).getDate();
-      const offset = (firstDayOfMonth === 0) ? 6 : firstDayOfMonth - 1;
-      const monthNames = [
+
+      const firstDay = new Date(year, month, 1).getDay();
+      const offset   = firstDay === 0 ? 6 : firstDay - 1;
+      const lastDate = new Date(year, month + 1, 0).getDate();
+
+      const names = [
         "January","February","March","April","May","June",
         "July","August","September","October","November","December"
       ];
-      monthYear.textContent = monthNames[month] + " " + year;
+      monthYear.textContent = `${names[month]} ${year}`;
+
       for (let i = 0; i < offset; i++) {
-        const emptyCell = document.createElement("div");
-        calendarDates.appendChild(emptyCell);
+        calendarDates.appendChild(document.createElement("div"));
       }
-      for (let day = 1; day <= lastDateOfMonth; day++) {
-        const dayCell = document.createElement("div");
-        dayCell.textContent = day;
-        const isToday = (
-          day === new Date().getDate() &&
-          month === new Date().getMonth() &&
-          year === new Date().getFullYear()
-        );
-        if (isToday) {
-          dayCell.classList.add("today");
+
+      for (let day = 1; day <= lastDate; day++) {
+        const cell = document.createElement("div");
+        cell.textContent = day;
+        const now = new Date();
+        if (
+          day === now.getDate() &&
+          month === now.getMonth() &&
+          year === now.getFullYear()
+        ) {
+          cell.classList.add("today");
         }
-        calendarDates.appendChild(dayCell);
+        calendarDates.appendChild(cell);
       }
-    };
-    document.getElementById("prev-month").addEventListener("click", () => {
+    }
+
+    prevBtn.addEventListener("click", () => {
       currentDate.setMonth(currentDate.getMonth() - 1);
       renderCalendar(currentDate);
     });
-    document.getElementById("next-month").addEventListener("click", () => {
+    nextBtn.addEventListener("click", () => {
       currentDate.setMonth(currentDate.getMonth() + 1);
       renderCalendar(currentDate);
     });
+
     renderCalendar(currentDate);
+  });
   </script>
 </body>
 </html>
