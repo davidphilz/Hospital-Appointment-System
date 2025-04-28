@@ -1,0 +1,53 @@
+.pending-transfers-container {
+  max-width: 800px;
+  margin: 40px auto;
+  padding: 20px;
+  font-family: Arial, sans-serif;
+  text-align: center;
+}
+
+.pending-transfers-container h2 {
+  margin-bottom: 20px;
+}
+
+.transfers-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.transfers-table th,
+.transfers-table td {
+  border: 1px solid #ccc;
+  padding: 10px;
+  text-align: center;
+}
+
+.transfers-table th {
+  background-color: #f2f2f2;
+}
+
+.transfers-table button {
+  padding: 5px 10px;
+  background-color: #1976d2;
+  color: #fff;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  margin: 0 5px;
+  transition: background-color 0.3s ease;
+}
+
+.transfers-table button:hover {
+  background-color: #1258a7;
+}
+
+.error-message {
+  color: red;
+  margin-top: 10px;
+}
+
+.status-message {
+  color: green;
+  margin-top: 10px;
+}

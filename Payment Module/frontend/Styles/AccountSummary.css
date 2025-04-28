@@ -1,0 +1,50 @@
+.account-summary-card {
+    background: #2a2b38;
+    color: #ffeba7;
+    padding: 20px;
+    padding-top: 100px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    width: 320px;
+    transition: transform 0.3s ease;
+}
+
+.account-summary-card:hover {
+    transform: translateY(-5px);
+}
+
+.summary-title {
+    font-size: 22px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.user-name {
+    font-size: 18px;
+    font-weight: 500;
+    margin-bottom: 15px;
+}
+
+.summary-details {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.summary-item {
+    display: flex;
+    justify-content: space-between;
+    font-size: 16px;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 10px;
+    border-radius: 6px;
+}
+
+.label {
+    font-weight: bold;
+}
+
+.value {
+    font-weight: normal;
+}

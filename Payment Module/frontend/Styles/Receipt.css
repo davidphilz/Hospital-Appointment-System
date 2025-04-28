@@ -1,0 +1,28 @@
+.receipt-container {
+  max-width: 600px;
+  margin: 50px auto;
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: #fafafa;
+  text-align: left;
+}
+
+.receipt-content p {
+  font-size: 16px;
+  margin: 10px 0;
+}
+
+.download-button {
+  margin-top: 20px;
+  padding: 10px 20px;
+  background-color: #1976d2;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.download-button:hover {
+  background-color: #1258a7;
+}

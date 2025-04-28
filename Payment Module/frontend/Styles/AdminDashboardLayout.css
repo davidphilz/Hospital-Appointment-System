@@ -1,0 +1,124 @@
+/* Container for the whole dashboard */
+.admin-dashboard-container {
+    display: flex;
+    min-height: 100vh;
+    width: 100%;
+  }
+  
+  /* Sidebar Animation */
+  @keyframes expandSidebar {
+    from {
+      width: 80px;
+    }
+    to {
+      width: 250px;
+    }
+  }
+  
+  @keyframes collapseSidebar {
+    from {
+      width: 250px;
+    }
+    to {
+      width: 80px;
+    }
+  }
+  
+  /* Sidebar Styles */
+  .admin-sidebar {
+    width: 80px; /* Start with collapsed state */
+    background-color: #2a2b38;
+    color: #ffeba7;
+    padding: 20px;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+    height: 100vh;
+    box-shadow: 3px 0 5px rgba(0, 0, 0, 0.3);
+    position: fixed;
+    left: 0;
+    top: 0;
+  }
+  
+  /* Expanded Sidebar */
+  .admin-sidebar:not(.collapsed) {
+    animation: expandSidebar 0.3s ease forwards;
+    width: 250px;
+  }
+  
+  /* Collapsed Sidebar */
+  .admin-sidebar.collapsed {
+    animation: collapseSidebar 0.3s ease forwards;
+    width: 80px;
+    border-right: 2px solid rgba(255, 255, 255, 0.2);
+  }
+  
+  .sidebar-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 20px;
+    margin-bottom: 20px;
+    padding-top: 60px;
+  }
+  
+  .menu-icon {
+    font-size: 24px;
+    cursor: pointer;
+  }
+  
+  .admin-sidebar nav ul {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .admin-sidebar nav ul li {
+    margin-bottom: 15px;
+  }
+  
+  .admin-sidebar nav ul li a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #ffeba7;
+    text-decoration: none;
+    font-size: 18px;
+    padding: 10px;
+    border-radius: 8px;
+    transition:
+        background 0.3s ease,
+        transform 0.2s ease;
+  }
+  
+  .admin-sidebar nav ul li a:hover,
+  .admin-sidebar nav ul li a.active {
+    background-color: #ffeba7;
+    color: #2a2b38;
+    font-weight: bold;
+    transform: scale(1.05);
+  }
+  
+  .icon {
+    font-size: 20px;
+  }
+  
+  /* Main Content (Fixes Content Being Pushed) */
+  .admin-content {
+    flex-grow: 1;
+    padding: 20px;
+    width: calc(100% - 80px); /* Ensures proper width */
+    margin-left: 80px; /* Aligns it properly with sidebar */
+    transition: margin-left 0.3s ease-in-out;
+  }
+  
+  /* When Sidebar is Expanded */
+  .admin-sidebar:not(.collapsed) ~ .admin-content {
+    margin-left: 250px;
+    width: calc(100% - 250px);
+  }
+  
+  /* Prevent unwanted margins in child pages */
+  .admin-content > * {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+  }

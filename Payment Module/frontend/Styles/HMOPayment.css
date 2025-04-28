@@ -1,0 +1,108 @@
+/* Set the entire page background color to dark grey */
+.hmo-page {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh; /* Full viewport height */
+    background-color: #2a2b38; /* Dark Grey */
+}
+
+/* Main payment container with 3D effect */
+.hmo-payment-container {
+    background: #333642; /* Slightly lighter grey */
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4); /* Soft shadow for 3D look */
+    position: relative; /* Needed for absolute positioning of the border animation */
+    overflow: hidden; /* Prevents border animation from overflowing */
+    transition: all 0.3s ease;
+}
+
+/* Animated glowing border effect */
+.hmo-payment-container::before {
+    content: "";
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    width: calc(100% + 4px);
+    height: calc(100% + 4px);
+    background: linear-gradient(45deg, #ffeba7, transparent, transparent, #ffeba7); /* Glowing gold border */
+    border-radius: 12px;
+    z-index: -1;
+    animation: rotateBorder 4s linear infinite; /* Rotating animation */
+}
+
+/* Rotate border animation */
+@keyframes rotateBorder {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* Add a soft glowing hover effect */
+.hmo-payment-container:hover {
+    box-shadow: 0 6px 15px rgba(255, 235, 167, 0.3);
+}
+
+/* Styling for the form title */
+.hmo-payment-container h2 {
+    text-align: center;
+    color: #ffeba7; /* Gold text */
+}
+
+/* Styling for form layout */
+.hmo-payment-container form {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Label styling */
+.hmo-payment-container label {
+    font-weight: bold;
+    margin-top: 10px;
+    color: white;
+}
+
+/* Input field styling */
+.hmo-payment-container input {
+    padding: 10px;
+    margin-top: 5px;
+    border: none;
+    border-radius: 6px;
+    background: #444754; /* Darker grey for input fields */
+    color: white;
+}
+
+/* Input focus effect */
+.hmo-payment-container input:focus {
+    outline: 2px solid #ffeba7; /* Highlight input when focused */
+}
+
+/* Submit button styling */
+.hmo-payment-container button {
+    margin-top: 15px;
+    padding: 12px;
+    background-color: #ffeba7; /* Gold */
+    color: #2a2b38; /* Dark text for contrast */
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.3s ease-in-out;
+}
+
+/* Hover effect for the button */
+.hmo-payment-container button:hover {
+    background-color: #ffdb70; /* Slightly brighter gold */
+    transform: scale(1.05); /* Slight zoom-in effect */
+}
+
+/* Message styling (success or error messages) */
+.message {
+    text-align: center;
+    margin-bottom: 10px;
+    color: #ffeba7;
+}
