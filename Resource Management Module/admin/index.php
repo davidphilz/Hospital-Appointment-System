@@ -233,7 +233,9 @@ include("../include/connection.php");
                 <div class="dashboard-card bg-secondary">
                   <div>
                     <h5>Total Income</h5>
-                    <div class="big-number">0</div>
+                    <div class="big-number">
+                      <?php include 'getTotalIncome.php'; ?>
+                    </div>
                   </div>
                   <i class="fas fa-dollar-sign"></i>
                 </div>
