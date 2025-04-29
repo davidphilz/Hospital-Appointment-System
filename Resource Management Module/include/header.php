@@ -40,7 +40,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
 <body>
     <nav class="navbar navbar-expand-lg navbar-custom p-3">
         <div class="container">
-            <h5 class="text-white mb-0">Hospital System</h5>
+            <h5 class="text-white mb-0">Hospital Managment System</h5>
             <div class="ms-auto">
                 <ul class="navbar-nav">
                     <?php
