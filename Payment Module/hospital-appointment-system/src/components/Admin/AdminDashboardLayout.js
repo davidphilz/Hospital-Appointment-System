@@ -50,6 +50,11 @@ const AdminDashboardLayout = () => {
               </NavLink>
             </li>
             <li>
+              <a href='http://localhost//Resource%20Management%20Module/index.php' target='_blank' className={({ isActive }) => (isActive ? 'active' : '')}>
+                Resource Management
+              </a>
+            </li>
+            <li>
               <NavLink
                 to="/admin-dashboard/refunds"
                 className={({ isActive }) => (isActive ? 'active' : '')}
@@ -65,6 +70,7 @@ const AdminDashboardLayout = () => {
                 History
               </NavLink>
             </li>
+            
           </ul>
         </nav>
       </aside>

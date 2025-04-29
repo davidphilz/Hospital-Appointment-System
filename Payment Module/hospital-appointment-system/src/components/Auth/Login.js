@@ -33,7 +33,7 @@ const Login = () => {
       alert(response.data.message)
 
       if (response.data.role === 'admin') {
-        navigate('/admin-dashboard')
+        navigate('/admin-dashboard/overview')
       } else {
         navigate('/user-dashboard')
       }
