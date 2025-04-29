@@ -1,0 +1,82 @@
+:root {
+    --bg-col: #2a2b38;
+    --main-col: #ffeba7;
+  }
+  
+  .user-overview {
+    max-width: 900px;
+    margin: auto;
+    padding: 20px;
+    color: var(--main-col);
+    text-align: center;
+  }
+  
+  /* Title Styling */
+  .dashboard-title {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 15px;
+    text-shadow: 0px 0px 10px var(--main-col);
+  }
+  
+  /* Recent Transactions Section */
+  .recent-transactions {
+    background: var(--bg-col);
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+    margin-top: 20px;
+    animation: fadeIn 1s ease-in-out;
+  }
+  
+  .recent-transactions h2 {
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+  }
+  
+  /* Transactions Table */
+  .transaction-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+    animation: fadeIn 1s ease-in-out;
+  }
+  
+  .transaction-table th,
+  .transaction-table td {
+    padding: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  }
+  
+  .transaction-table th {
+    background: var(--main-col);
+    color: var(--bg-col);
+    font-weight: bold;
+  }
+  
+  .transaction-table tr {
+    transition: background 0.3s ease-in-out;
+  }
+  
+  .transaction-table tr:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
+  
+  /* No Transactions Message */
+  .no-transactions {
+    font-size: 1rem;
+    opacity: 0.7;
+  }
+  
+  /* Fade-in Animation */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  

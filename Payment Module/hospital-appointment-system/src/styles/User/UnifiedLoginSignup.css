@@ -1,0 +1,66 @@
+:root {
+    --main-col: #ffeba7; /* Soft Yellow */
+    --bg-col: #2a2b38;   /* Dark Grey */
+}
+
+/* Main Container */
+.auth-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: var(--bg-col);
+    perspective: 1200px; /* Enables 3D flipping */
+}
+
+/* Card Container with Flip Effect */
+.auth-card {
+    width: 350px;
+    height: 500px;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.8s ease-in-out;
+}
+
+.auth-card.flip {
+    transform: rotateY(180deg); /* Flip animation */
+}
+
+/* Front & Back Sides of the Card */
+.auth-side {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    backface-visibility: hidden;
+    background-color: var(--bg-col);
+    border: 2px solid var(--main-col);
+    border-radius: 10px;
+    padding: 2rem;
+    box-shadow: 0px 4px 15px rgba(255, 235, 167, 0.3);
+    text-align: center;
+    color: var(--main-col);
+}
+
+.back {
+    transform: rotateY(180deg);
+}
+
+/* Input Group */
+.auth-input-group {
+    display: flex;
+    align-items: center;
+    background: transparent;
+    border: 1px solid var(--main-col);
+    padding: 10px;
+    margin: 10px 0;
+}
+
+.input-icon {
+    height: 100%;
+    width: 1em;
+    color: var(--main-col);
+    fill: var(--main-col);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
