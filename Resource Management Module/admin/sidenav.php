@@ -13,7 +13,7 @@
                     <a href="notice.php" class="list-group-item list-group-item-action bg-info text-center text-white">Notice</a>
                     <a href="new_equipment.php" class="list-group-item list-group-item-action bg-info text-center text-white">Equipment</a>
                     <a href="admin_manage_resources.php" class="list-group-item list-group-item-action bg-info text-center text-white">Manage Resource</a>
-                    <a href="managepayment.php" class="list-group-item list-group-item-action bg-info text-center text-white">Manage Payment</a>
+                    <a href="http://localhost:3000" class="list-group-item list-group-item-action bg-info text-center text-white">Manage Payment</a>
                     <a href="hospital_management.php" class="list-group-item list-group-item-action bg-info text-center text-white">Update</a>
                     <a href="profile.php" class="list-group-item list-group-item-action bg-info text-center text-white">Profile</a>
                     <a href="admin_panel.php" class="list-group-item list-group-item-action bg-info text-center text-white">Inbox</a>

@@ -50,7 +50,7 @@ const AdminDashboardLayout = () => {
               </NavLink>
             </li>
             <li>
-              <a href='http://localhost//Resource%20Management%20Module/index.php' target='_blank' className={({ isActive }) => (isActive ? 'active' : '')}>
+              <a href='http://localhost/Hospital-Appointment-System/Resource%20Management%20Module/index.php' target='_blank' className={({ isActive }) => (isActive ? 'active' : '')}>
                 Resource Management
               </a>
             </li>
