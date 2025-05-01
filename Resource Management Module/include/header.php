@@ -5,14 +5,9 @@ if (session_status() === PHP_SESSION_NONE) {
 
 if (isset($_SESSION['doctor'])) {
     unset($_SESSION['admin']);
-    unset($_SESSION['patient']);
 } elseif (isset($_SESSION['admin'])) {
     unset($_SESSION['doctor']);
-    unset($_SESSION['patient']);
-} //elseif (isset($_SESSION['patient'])) {
-   // unset($_SESSION['admin']);
-    //unset($_SESSION['doctor']);
-//}
+}
 
 $current_page = basename($_SERVER['PHP_SELF']);
 ?>
