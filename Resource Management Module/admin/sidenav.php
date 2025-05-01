@@ -17,6 +17,7 @@
                     <a href="hospital_management.php" class="list-group-item list-group-item-action bg-info text-center text-white">Update</a>
                     <a href="profile.php" class="list-group-item list-group-item-action bg-info text-center text-white">Profile</a>
                     <a href="admin_panel.php" class="list-group-item list-group-item-action bg-info text-center text-white">Inbox</a>
+                    <a href="reports.php" class="list-group-item list-group-item-action bg-info text-center text-white">Report</a>
                 </div>
 </body> 
 </html>

@@ -310,7 +310,7 @@
             <div class="card-body">
               <h5 class="card-title">Staff Login</h5>
               <p class="card-text">
-                Authorized personnel can sign in to manage patient data, resources, and other administrative tasks.
+              This section is for hospital staff, enabling authorized personnel to log in and manage hospital resources.
               </p>
               <a href="staff/staff_login.php" class="btn btn-warning">Start Now!</a>
             </div>
