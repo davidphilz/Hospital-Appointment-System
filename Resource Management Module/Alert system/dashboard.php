@@ -1,105 +1,115 @@
 <?php
 session_start();
-include("../include/db.php");
+require_once __DIR__ . '/../include/db.php';
 
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit;
 }
 
-$username = htmlspecialchars($_SESSION['username']);
+// Sanitize output
+$username = htmlspecialchars($_SESSION['username'], ENT_QUOTES, 'UTF-8');
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alert System</title>
     <style>
         :root {
-            --primary-color: #0066cc;
-            --background: #f0f2f5;
-            --card-bg: #ffffff;
+            --primary: #0066cc;
+            --primary-dark: #004999;
+            --bg: #f0f2f5;
+            --card: #fff;
             --text-dark: #333;
             --text-light: #666;
-            --border-radius: 12px;
+            --radius: 12px;
+            --transition: 0.3s;
         }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        *, *::before, *::after { box-sizing: border-box; }
         body {
+            margin: 0;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--background);
+            background: var(--bg);
             color: var(--text-dark);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
         }
-
         header {
-            background-color: var(--primary-color);
-            padding: 20px;
-            color: white;
+            background: var(--primary);
+            padding: 1rem;
             text-align: center;
-            font-size: 24px;
-            letter-spacing: 1px;
+            color: #fff;
+            font-size: 1.5rem;
         }
-
-        .dashboard {
-            max-width: 600px;
-            margin: 50px auto;
-            padding: 30px;
-            background-color: var(--card-bg);
-            border-radius: var(--border-radius);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        main {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+        .card {
+            background: var(--card);
+            border-radius: var(--radius);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            max-width: 400px;
+            width: 100%;
+            padding: 2rem;
             text-align: center;
         }
-
-        .dashboard h2 {
-            margin-bottom: 15px;
-            font-size: 22px;
-            color: var(--text-dark);
+        .card h2 {
+            margin-bottom: 0.5rem;
+            font-size: 1.75rem;
         }
-
-        .dashboard p {
+        .card p {
+            margin-bottom: 1.5rem;
             color: var(--text-light);
-            font-size: 16px;
-            margin-bottom: 30px;
+            font-size: 1rem;
         }
-
-        .buttons a {
-            display: inline-block;
-            margin: 10px;
-            padding: 12px 24px;
-            background-color: var(--primary-color);
+        .actions {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+        }
+        .actions a {
+            padding: 0.75rem 1.5rem;
+            background: var(--primary);
             color: #fff;
             text-decoration: none;
             border-radius: 6px;
-            font-size: 15px;
-            transition: background-color 0.3s ease;
+            font-size: 0.95rem;
+            transition: background var(--transition);
         }
-
-        .buttons a:hover {
-            background-color: #004999;
+        .actions a:hover {
+            background: var(--primary-dark);
+        }
+        footer {
+            text-align: center;
+            padding: 1rem;
+            font-size: 0.85rem;
+            color: var(--text-light);
         }
     </style>
 </head>
 <body>
-
-<header>
-    Hospital Management Dashboard
-</header>
-
-<div class="dashboard">
-    <h2>Welcome, Admin</h2>
-    <p><?= $username ?>, you have full administrative access.</p>
-
-    <div class="buttons">
-        <a href="send_alert.php">Send Alert</a>
-        <a href="logout.php">Logout</a>
-    </div>
-</div>
-
+    <header>
+    Alert System
+    </header>
+    <main>
+        <div class="card">
+            <h2>Welcome</h2>
+            <p>Hello <strong><?php echo $username; ?></strong>, you have full administrative privileges.</p>
+            <div class="actions">
+                <a href="send_alert.php">Send Alert</a>
+                <a href="logout.php">Logout</a>
+            </div>
+        </div>
+    </main>
+    <footer>
+        &copy; <?php echo date('Y'); ?> Our Hospital
+    </footer>
 </body>
 </html>

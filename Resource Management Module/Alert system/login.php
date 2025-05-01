@@ -2,9 +2,6 @@
 ob_start();
 session_start();
 
-// Uncomment these lines during development to see any PHP errors:
-// ini_set('display_errors', 1);
-// error_reporting(E_ALL);
 
 $error = "";
 
@@ -12,14 +9,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = trim(filter_input(INPUT_POST, 'username', FILTER_SANITIZE_STRING));
     $password = trim(filter_input(INPUT_POST, 'password', FILTER_SANITIZE_STRING));
 
-    // username => password
     $default_users = [
         'admin' => 'admin123',
-        // you can add more users here
     ];
 
     if (isset($default_users[$username]) && $default_users[$username] === $password) {
-        // Prevent session fixation
         session_regenerate_id(true);
         $_SESSION['user_id']   = 0;
         $_SESSION['username']  = $username;

@@ -17,7 +17,6 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['mark_read_id'])) {
     $alertId = intval($_POST['mark_read_id']);
     $stmtMark = $conn->prepare("UPDATE alerts SET is_read = 1 WHERE id = ?");
@@ -25,11 +24,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['mark_read_id'])) {
     $stmtMark->execute();
 }
 
-
 $alerts = $conn->query(
-    "SELECT id, title, message, sender_role, created_at, is_read
-       FROM alerts
-      ORDER BY created_at DESC"
+    "SELECT id, title, message, created_at, is_read
+     FROM alerts
+     ORDER BY created_at DESC"
 );
 ?>
 
@@ -267,7 +265,7 @@ $alerts = $conn->query(
                 <div class="alert <?php echo $row['is_read'] ? 'alert-secondary' : 'alert-info'; ?> d-flex justify-content-between align-items-center">
                   <div>
                     <strong><?php echo htmlspecialchars($row['title']); ?></strong><br>
-                    <small class="text-muted">by <?php echo htmlspecialchars($row['sender_role']); ?> at <?php echo date('M d, Y H:i', strtotime($row['created_at'])); ?></small>
+                    <small class="text-muted">at <?php echo date('M d, Y H:i', strtotime($row['created_at'])); ?></small>
                     <p class="mb-0 mt-2"><?php echo nl2br(htmlspecialchars($row['message'])); ?></p>
                   </div>
                   <?php if (!$row['is_read']): ?>
@@ -315,8 +313,8 @@ $alerts = $conn->query(
         datesEl.appendChild(cell);
       }
     }
-    document.getElementById("prev-month").onclick = () => { currentDate.setMonth(currentDate.getMonth()-1); renderCalendar(currentDate); }
-    document.getElementById("next-month").onclick = () => { currentDate.setMonth(currentDate.getMonth()+1); renderCalendar(currentDate); }
+    document.getElementById("prev-month").onclick = () => { currentDate.setMonth(currentDate.getMonth()-1); renderCalendar(currentDate); };
+    document.getElementById("next-month").onclick = () => { currentDate.setMonth(currentDate.getMonth()+1); renderCalendar(currentDate); };
     renderCalendar(currentDate);
   </script>
 </body>
