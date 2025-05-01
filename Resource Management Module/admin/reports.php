@@ -32,7 +32,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['bed_id'])) {
             "INSERT INTO beds_history (bed_id, status) VALUES (:bed_id, 'occupied')"
         );
         $stmt->execute(['bed_id' => $newBedId]);
-        // Redirect to avoid form resubmission
         header("Location: ?from={$from}&to={$to}&bed_id={$bed_id}");
         exit;
     }
@@ -69,23 +68,67 @@ $beds_history = $stmt->fetchAll(PDO::FETCH_ASSOC);
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Hospital Resource Reports</title>
-  <link
-    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
-    rel="stylesheet"
-    integrity="sha384-..." crossorigin="anonymous"
-  >
-  <link
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
-    rel="stylesheet"
-    integrity="sha384-..." crossorigin="anonymous"
-  >
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     body {
-      background-color: #f4f6f9;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      margin: 0; 
-      padding: 0;
+      background-color: #f8f9fa;
+    }
+    .layout-container {
+      display: flex;
+      min-height: 100vh;
+    }
+    .sidebar {
+      background-color: #343a40;
+      color: #fff;
+      min-height: 100vh;
+    }
+    .sidebar a {
+      color: #ccc;
+      padding: 12px 20px;
+      display: block;
+      text-decoration: none;
+      transition: 0.3s;
+    }
+    .sidebar a:hover, .sidebar a.active {
+      background-color: #495057;
+      color: #fff;
+    }
+    .main-content {
+      flex: 1;
+      padding: 40px 60px;
+      background-color: #f4f6f9;
+    }
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 30px;
+      font-weight: bold;
+    }
+    .table thead th {
+      vertical-align: middle;
+      text-align: center;
+    }
+    .table td, .table th {
+      vertical-align: middle;
+    }
+    .badge-status {
+      font-size: 0.9rem;
+      padding: 5px 10px;
+      border-radius: 12px;
+    }
+    .badge-yes {
+      background-color: #28a745;
+      color: white;
+    }
+    .badge-no {
+      background-color: #dc3545;
+      color: white;
+    }
+    .btn-view {
+      padding: 5px 12px;
+      font-size: 0.85rem;
     }
     .sidebar {
       background-color: #343a40;
@@ -166,39 +209,28 @@ $beds_history = $stmt->fetchAll(PDO::FETCH_ASSOC);
 </head>
 <body>
   <div class="layout-container">
-    <aside class="sidebar p-3">
-      <?php include __DIR__ . '/sidenav.php'; ?>
-    </aside>
+  <nav class="col-md-2 sidebar p-3">
+      <?php include("sidenav.php"); ?>
+    </nav>
     <main class="main-content">
       <h2 class="mb-4">Reports &amp; Analytics</h2>
 
       <form class="row g-3 mb-5" method="get">
         <div class="col-md-3">
           <label for="fromDate" class="form-label">From</label>
-          <input
-            type="date" id="fromDate" name="from"
-            value="<?= htmlspecialchars($from) ?>"
-            class="form-control">
+          <input type="date" id="fromDate" name="from" value="<?= htmlspecialchars($from) ?>" class="form-control">
         </div>
         <div class="col-md-3">
           <label for="toDate" class="form-label">To</label>
-          <input
-            type="date" id="toDate" name="to"
-            value="<?= htmlspecialchars($to) ?>"
-            class="form-control">
+          <input type="date" id="toDate" name="to" value="<?= htmlspecialchars($to) ?>" class="form-control">
         </div>
         <div class="col-md-3">
           <label for="bedId" class="form-label">Bed ID (optional)</label>
-          <input
-            type="number" id="bedId" name="bed_id"
-            value="<?= htmlspecialchars($bed_id) ?>"
-            class="form-control">
+          <input type="number" id="bedId" name="bed_id" value="<?= htmlspecialchars($bed_id) ?>" class="form-control">
         </div>
         <div class="col-md-3 d-flex align-items-end">
           <button type="submit" class="btn btn-primary me-2">Run Report</button>
-          <a
-            href="export.php?from=<?=urlencode($from)?>&to=<?=urlencode($to)?>&bed_id=<?=urlencode($bed_id)?>"
-            class="btn btn-outline-secondary">
+          <a href="export.php?from=<?=urlencode($from)?>&to=<?=urlencode($to)?>&bed_id=<?=urlencode($bed_id)?>" class="btn btn-outline-secondary">
             <i class="fas fa-download"></i> Download CSV
           </a>
         </div>
@@ -208,7 +240,7 @@ $beds_history = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <canvas id="bedsChart" height="100"></canvas>
       </section>
 
-      <section class="mt-5">
+      <!-- <section class="mt-5">
         <h3 class="mb-3">Mark Bed as Occupied</h3>
         <form method="post" class="row g-3 align-items-end">
           <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
@@ -220,47 +252,55 @@ $beds_history = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <button type="submit" class="btn btn-success">Mark Occupied</button>
           </div>
         </form>
-      </section>
+      </section> -->
     </main>
   </div>
 
   <script>
-    const dataLabels = <?= json_encode(array_column($beds_history, 'day')) ?>;
-    const occupiedData = <?= json_encode(array_column($beds_history, 'occupied')) ?>;
-    const totalData = <?= json_encode(array_column($beds_history, 'total')) ?>;
+  const dataLabels = <?= json_encode(array_column($beds_history, 'day')) ?>;
+  const occupiedData = <?= json_encode(array_column($beds_history, 'occupied')) ?>;
+  const totalData = <?= json_encode(array_column($beds_history, 'total')) ?>;
 
-    new Chart(
-      document.getElementById('bedsChart').getContext('2d'), {
-        type: 'line',
-        data: {
-          labels: dataLabels,
-          datasets: [
-            {
-              label: 'Occupied Beds',
-              data: occupiedData,
-              borderColor: 'rgb(255, 99, 132)',
-              fill: false,
-              tension: 0.2
-            },
-            {
-              label: 'Total Records',
-              data: totalData,
-              borderColor: 'rgb(54, 162, 235)',
-              borderDash: [5,5],
-              fill: false,
-              tension: 0.2
-            }
-          ]
+  new Chart(
+    document.getElementById('bedsChart').getContext('2d'), {
+      type: 'bar',
+      data: {
+        labels: dataLabels,
+        datasets: [
+          {
+            label: 'Occupied Beds',
+            data: occupiedData,
+            backgroundColor: 'rgba(255, 99, 132, 0.7)',
+            borderColor: 'rgb(255, 99, 132)',
+            borderWidth: 1
+          },
+          {
+            label: 'Total Records',
+            data: totalData,
+            backgroundColor: 'rgba(54, 162, 235, 0.7)',
+            borderColor: 'rgb(54, 162, 235)',
+            borderWidth: 1
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { position: 'top' },
+          title: {
+            display: true,
+            text: 'Bed Usage Over Time (Bar Chart)'
+          }
         },
-        options: {
-          responsive: true,
-          plugins: {
-            legend: { position: 'top' },
-            title: { display: true, text: 'Bed Usage Over Time' }
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: {
+              stepSize: 1
+            }
           }
         }
       }
-    );
-  </script>
-</body>
-</html>
+    }
+  );
+</script>

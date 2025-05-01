@@ -5,19 +5,16 @@ include __DIR__ . '/../include/header.php';
 require __DIR__ . '/../include/db.php';
 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-// CSRF token
 if (empty($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 
-// Auto-clear expired allocations
 $pdo->prepare(
     "UPDATE rooms 
      SET is_allocated = 0, patient_name = NULL, expiry_date = NULL 
      WHERE is_allocated = 1 AND expiry_date < NOW()"
 )->execute();
 
-// Handle capacity update
 $message_capacity = '';
 if (isset($_POST['update_capacity'])) {
     if (!hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'] ?? '')) {
@@ -36,7 +33,6 @@ if (isset($_POST['update_capacity'])) {
 $total_rooms_setting = (int)($pdo->query("SELECT value FROM settings WHERE name='total_rooms'")->fetchColumn() ?: 0);
 $total_beds_setting  = (int)($pdo->query("SELECT value FROM settings WHERE name='total_beds'")->fetchColumn() ?: 0);
 
-// Handle room allocation/deallocation
 $message_room = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && in_array($_POST['action'], ['allocate','deallocate'])) {
     if (!hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'] ?? '')) {
@@ -62,7 +58,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && in_array
                 : "Allocation failed. Room may be occupied.";
         }
     } else {
-        // deallocate
         if ($room_id) {
             $stmt = $pdo->prepare(
                 "UPDATE rooms SET is_allocated=0, patient_name=NULL, expiry_date=NULL WHERE id=:id AND is_allocated=1"
@@ -75,7 +70,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && in_array
     }
 }
 
-// Bed usage report
 $rawFrom = filter_input(INPUT_GET, 'from', FILTER_SANITIZE_STRING);
 $rawTo   = filter_input(INPUT_GET, 'to',   FILTER_SANITIZE_STRING);
 $from = DateTime::createFromFormat('Y-m-d', $rawFrom) ? $rawFrom : date('Y-m-01');
@@ -88,7 +82,6 @@ $sql .= " GROUP BY day ORDER BY day";
 $params=['s'=>"{$from} 00:00:00",'e'=>"{$to} 23:59:59"]; if ($bed_id) $params['bid']=$bed_id;
 $stmt=$pdo->prepare($sql); $stmt->execute($params); $beds_history=$stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Fetch rooms lists
 $rooms = $pdo->query("SELECT * FROM rooms ORDER BY room_number ASC")->fetchAll(PDO::FETCH_ASSOC);
 $available_rooms = array_filter($rooms, fn($r)=>!$r['is_allocated']);
 $allocated_rooms = array_filter($rooms, fn($r)=> $r['is_allocated']);
@@ -188,12 +181,11 @@ $allocated_rooms = array_filter($rooms, fn($r)=> $r['is_allocated']);
 </head>
 <body>
   <div class="d-flex">
-    <aside class="sidebar p-3">
-      <?php include __DIR__.'/sidenav.php'; ?>
-    </aside>
+    <nav class="col-md-2 sidebar p-3">
+      <?php include("sidenav.php"); ?>
+    </nav>
     <main class="main-content flex-grow-1">
       <h2>Admin Dashboard</h2>
-      <!-- Capacity -->
       <div class="card mb-4">
         <div class="card-header bg-primary text-white">Update Capacity</div>
         <div class="card-body">
@@ -235,7 +227,6 @@ $allocated_rooms = array_filter($rooms, fn($r)=> $r['is_allocated']);
           </table>
         </div>
       </div>
-      <!-- Bed Reports -->
       <div class="card shadow-sm">
         <div class="card-header bg-primary text-white">Bed Usage Reports</div>
         <div class="card-body">
