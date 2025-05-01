@@ -9,10 +9,10 @@ if (isset($_SESSION['doctor'])) {
 } elseif (isset($_SESSION['admin'])) {
     unset($_SESSION['doctor']);
     unset($_SESSION['patient']);
-} elseif (isset($_SESSION['patient'])) {
-    unset($_SESSION['admin']);
-    unset($_SESSION['doctor']);
-}
+} //elseif (isset($_SESSION['patient'])) {
+   // unset($_SESSION['admin']);
+    //unset($_SESSION['doctor']);
+//}
 
 $current_page = basename($_SERVER['PHP_SELF']);
 ?>
@@ -62,21 +62,11 @@ $current_page = basename($_SERVER['PHP_SELF']);
                             <li class="nav-item">
                                 <a href="logout.php" class="nav-link text-white"><i class="fas fa-sign-out-alt"></i> Logout</a>
                             </li>';
-                        } else if (isset($_SESSION['patient'])) {
-                            $user = $_SESSION['patient'];
-                            echo '
-                            <li class="nav-item">
-                                <a href="#" class="nav-link text-white"><i class="fas fa-user-injured"></i> ' . $user . '</a>
-                            </li>
-                            <li class="nav-item">
-                                <a href="logout.php" class="nav-link text-white"><i class="fas fa-sign-out-alt"></i> Logout</a>
-                            </li>';
                         } else {
                             echo '
                             <li class="nav-item"><a href="index.php" class="nav-link text-white"><i class="fas fa-home"></i> Home</a></li>
                             <li class="nav-item"><a href="adminlogin.php" class="nav-link text-white"><i class="fas fa-user-shield"></i> Admin</a></li>
-                            <li class="nav-item"><a href="doctorlogin.php" class="nav-link text-white"><i class="fas fa-user-md"></i> Doctor</a></li>
-                            <li class="nav-item"><a href="patientlogin.php" class="nav-link text-white"><i class="fas fa-user-injured"></i> Patient</a></li>';
+                            <li class="nav-item"><a href="doctorlogin.php" class="nav-link text-white"><i class="fas fa-user-md"></i> Doctor</a></li>';
                         }
                     ?>
                 </ul>
