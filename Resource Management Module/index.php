@@ -294,7 +294,7 @@
         </div>
         <div class="col-md-4">
           <div class="card info-card h-100 text-center">
-            <img src="img/Alert.jpg" alt="Patient" class="img-fluid" loading="lazy">
+            <img src="img/Alert.jpg" alt="Alert" class="img-fluid" loading="lazy">
             <div class="card-body">
               <h5 class="card-title">Alert System</h5>
               <p class="card-text">
