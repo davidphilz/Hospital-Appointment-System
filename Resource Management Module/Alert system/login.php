@@ -1,28 +1,36 @@
 <?php
+ob_start();
 session_start();
+
+// Uncomment these lines during development to see any PHP errors:
+// ini_set('display_errors', 1);
+// error_reporting(E_ALL);
 
 $error = "";
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $username = trim($_POST["username"]);
-    $password = trim($_POST["password"]);
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $username = trim(filter_input(INPUT_POST, 'username', FILTER_SANITIZE_STRING));
+    $password = trim(filter_input(INPUT_POST, 'password', FILTER_SANITIZE_STRING));
 
+    // username => password
     $default_users = [
-        'admin' => ['username' => 'admin', 'password' => 'admin123'],
+        'admin' => 'admin123',
+        // you can add more users here
     ];
 
-    if (isset($default_users[$username]) && $default_users[$username]['password'] === $password) {
-        $_SESSION['user_id'] = 0;
-        $_SESSION['username'] = $username;
+    if (isset($default_users[$username]) && $default_users[$username] === $password) {
+        // Prevent session fixation
+        session_regenerate_id(true);
+        $_SESSION['user_id']   = 0;
+        $_SESSION['username']  = $username;
 
-        header("Location: dashboard.php");
-        exit;
+        header('Location: dashboard.php');
+        exit();
     } else {
-        $error = "Invalid username, password, or role.";
+        $error = "Invalid username or password.";
     }
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -39,22 +47,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             justify-content: center;
             align-items: center;
         }
-
         .login-form {
             background: rgba(255, 255, 255, 0.9);
             padding: 30px;
             border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
             width: 300px;
             text-align: center;
         }
-
         .login-form h2 {
             margin-bottom: 20px;
             font-size: 24px;
             color: #333;
         }
-
         .login-form input,
         .login-form button {
             width: 100%;
@@ -64,43 +69,32 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             border-radius: 4px;
             box-sizing: border-box;
         }
-
         .login-form button {
             background-color: #4CAF50;
             color: white;
             cursor: pointer;
             border: none;
         }
-
         .login-form button:hover {
             background-color: #45a049;
         }
-
         .login-form p {
             color: red;
-        }
-
-        .hint {
-            margin-top: 10px;
-            font-size: 13px;
-            color: #555;
-        }
-
-        .hint span {
-            display: block;
+            margin: 0;
         }
     </style>
 </head>
 <body>
 
 <div class="login-form">
-    <form method="post">
+    <form method="post" action="">
         <h2>Login</h2>
         <input type="text" name="username" required placeholder="Username">
         <input type="password" name="password" required placeholder="Password">
         <button type="submit">Login</button>
-
-        <?php if (!empty($error)) echo "<p>$error</p>"; ?>
+        <?php if ($error): ?>
+            <p><?= htmlspecialchars($error) ?></p>
+        <?php endif; ?>
     </form>
 </div>
 

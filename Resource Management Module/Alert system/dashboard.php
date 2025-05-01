@@ -2,13 +2,12 @@
 session_start();
 include("../include/db.php");
 
-if (!isset($_SESSION['user_id']) || !isset($_SESSION['role'])) {
+if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit;
 }
 
 $username = htmlspecialchars($_SESSION['username']);
-$role = $_SESSION['role'];
 ?>
 
 <!DOCTYPE html>
@@ -93,13 +92,8 @@ $role = $_SESSION['role'];
 </header>
 
 <div class="dashboard">
-    <?php if ($role === 'admin'): ?>
-        <h2>Welcome, Admin</h2>
-        <p><?= $username ?>, you have full administrative access.</p>
-    <?php else: ?>
-        <h2>Welcome, Doctor</h2>
-        <p><?= $username ?>, here is your quick access panel.</p>
-    <?php endif; ?>
+    <h2>Welcome, Admin</h2>
+    <p><?= $username ?>, you have full administrative access.</p>
 
     <div class="buttons">
         <a href="send_alert.php">Send Alert</a>
@@ -109,4 +103,3 @@ $role = $_SESSION['role'];
 
 </body>
 </html>
-

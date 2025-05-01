@@ -1,9 +1,9 @@
 <?php
 session_start();
 $servername = "localhost";
-$username = "root";       
-$password = "";           
-$dbname = "hospital_appointment_system";  
+$username = "root";
+$password = "";
+$dbname = "hospital_appointment_system";
 
 $conn = new mysqli($servername, $username, $password, $dbname);
 
@@ -17,13 +17,18 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $title = $_POST["title"];
-    $message = $_POST["message"];
-    $role = $_SESSION['role'];
+    $title = trim($_POST["title"]);
+    $message = trim($_POST["message"]);
+    $role = 'admin';
 
     $stmt = $conn->prepare("INSERT INTO alerts (sender_role, title, message) VALUES (?, ?, ?)");
     $stmt->bind_param("sss", $role, $title, $message);
-    $stmt->execute();
+
+    if ($stmt->execute()) {
+        echo "<script>alert('Alert sent successfully!'); window.location.href = 'dashboard.php';</script>";
+    } else {
+        echo "<script>alert('Failed to send alert.');</script>";
+    }
 }
 ?>
 
