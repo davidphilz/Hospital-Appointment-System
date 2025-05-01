@@ -2,6 +2,7 @@
 include("../include/db.php");
 include("header.php");
 
+
 if (!isset($_SESSION['staff_name'])) {
     header("Location: login.php");
     exit();
@@ -15,7 +16,6 @@ if (!isset($_SESSION['staff_name'])) {
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
-
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
     body {
@@ -165,169 +165,140 @@ if (!isset($_SESSION['staff_name'])) {
 </head>
 <body>
 <div class="container-fluid">
-    <div class="row">
-      <div class="col-md-2 p-0">
-        <?php include("sidenav.php"); ?>
-      </div>
-      <div class="col-md-10 content">
-        <h2 class="mb-4">Staff Dashboard</h2>
-        <div class="row">
-          <div class="col-md-8">
-            <div class="row">
-              <div class="col-md-4">
-                <div class="dashboard-card bg-success">
-                  <div>
-                    <h5>Available Rooms</h5>
-                    <div class="big-number">
-                      <?php
-                      $stmt = $pdo->prepare("SELECT COUNT(*) FROM rooms WHERE is_allocated = 0");
-                      $stmt->execute();
-                      $available_rooms_count = $stmt->fetchColumn();
-                      echo $available_rooms_count;
-                      ?>
-                    </div>
-                  </div>
-                  <i class="fas fa-bed"></i>
+  <div class="row">
+    <div class="col-md-2 p-0">
+      <?php include("sidenav.php"); ?>
+    </div>
+    <div class="col-md-10 content">
+      <h2 class="mb-4">Staff Dashboard</h2>
+      <div class="row">
+        <div class="col-md-8">
+          <div class="row">
+            <div class="col-md-4">
+              <div class="dashboard-card bg-success">
+                <div>
+                  <h5>Available Rooms</h5>
+                  <div class="big-number"><?php
+                    $stmt = $pdo->prepare("SELECT COUNT(*) FROM rooms WHERE is_allocated = 0");
+                    $stmt->execute();
+                    echo $stmt->fetchColumn();
+                  ?></div>
                 </div>
-              </div>
-              <div class="col-md-4">
-                <div class="dashboard-card bg-info">
-                  <div>
-                    <h5>Available Equipment</h5>
-                    <div class="big-number">
-                      <?php
-                      $stmt = $pdo->prepare("SELECT COUNT(*) FROM equipment WHERE status = 0");
-                      $stmt->execute();
-                      $available_equipment_count = $stmt->fetchColumn();
-                      echo $available_equipment_count;
-                      ?>
-                    </div>
-                  </div>
-                  <i class="fas fa-stethoscope"></i>
-                </div>
-              </div>
-              <div class="col-md-4">
-                <div class="dashboard-card bg-primary">
-                  <div>
-                    <h5>Staff On Duty</h5>
-                    <div class="big-number">
-                      <?php
-                      $stmt = $pdo->prepare("SELECT COUNT(*) FROM staff");
-                      $stmt->execute();
-                      echo $stmt->fetchColumn();
-                      ?>
-                    </div>
-                  </div>
-                  <i class="fas fa-user-nurse"></i>
-                </div>
+                <i class="fas fa-bed"></i>
               </div>
             </div>
-
-            <h3>Recent Notifications</h3>
-            <ul class="list-group mb-4">
-              <?php
-              $stmt = $pdo->prepare("SELECT * FROM hospital_alerts ORDER BY created_at DESC LIMIT 5");
-              $stmt->execute();
-              while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-                  echo '<li class="list-group-item d-flex justify-content-between align-items-center">'
-                       . htmlspecialchars($row['message'])
-                       . '<span class="badge badge-secondary badge-pill">'
-                       . htmlspecialchars($row['created_at'])
-                       . '</span></li>';
-              }
-              ?>
-            </ul>
+            <div class="col-md-4">
+              <div class="dashboard-card bg-info">
+                <div>
+                  <h5>Available Equipment</h5>
+                  <div class="big-number"><?php
+                    $stmt = $pdo->prepare("SELECT COUNT(*) FROM equipment WHERE status = 0");
+                    $stmt->execute();
+                    echo $stmt->fetchColumn();
+                  ?></div>
+                </div>
+                <i class="fas fa-stethoscope"></i>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="dashboard-card bg-primary">
+                <div>
+                  <h5>Staff On Duty</h5>
+                  <div class="big-number"><?php
+                    $stmt = $pdo->prepare("SELECT COUNT(*) FROM staff");
+                    $stmt->execute();
+                    echo $stmt->fetchColumn();
+                  ?></div>
+                </div>
+                <i class="fas fa-user-nurse"></i>
+              </div>
+            </div>
           </div>
-          
-          <!-- Right Column: Calendar -->
-          <div class="col-md-4">
-            <div id="calendar-wrapper">
-              <div id="calendar-header">
-                <span class="nav-btn" id="prev-month">&#10094;</span>
-                <h2 id="month-year"></h2>
-                <span class="nav-btn" id="next-month">&#10095;</span>
-              </div>
-              <div id="calendar-days">
-                <div>MON</div>
-                <div>TUE</div>
-                <div>WED</div>
-                <div>THU</div>
-                <div>FRI</div>
-                <div>SAT</div>
-                <div>SUN</div>
-              </div>
-              <div id="calendar-dates"></div>
+
+          <!-- Original Recent Notifications -->
+          <h3>Recent Notifications</h3>
+          <ul class="list-group mb-4">
+            <?php
+            $stmt = $pdo->prepare("SELECT * FROM hospital_alerts ORDER BY created_at DESC LIMIT 5");
+            $stmt->execute();
+            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                echo '<li class="list-group-item d-flex justify-content-between align-items-center">'
+                     . htmlspecialchars($row['message'])
+                     . '<span class="badge badge-secondary badge-pill">'
+                     . htmlspecialchars($row['created_at'])
+                     . '</span></li>';
+            }
+            ?>
+          </ul>
+
+          <!-- New Alert System Notifications -->
+          <h3>Alert</h3>
+          <ul class="list-group mb-4">
+            <?php
+            $stmt = $pdo->prepare("SELECT * FROM alerts ORDER BY created_at DESC LIMIT 5");
+            $stmt->execute();
+            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                echo '<li class="list-group-item d-flex justify-content-between align-items-center">'
+                     . htmlspecialchars($row['message'])
+                     . '<span class="badge badge-secondary badge-pill">'
+                     . htmlspecialchars($row['created_at'])
+                     . '</span></li>';
+            }
+            ?>
+          </ul>
+
+        </div>
+
+        <div class="col-md-4">
+          <div id="calendar-wrapper">
+            <div id="calendar-header">
+              <span class="nav-btn" id="prev-month">&#10094;</span>
+              <h2 id="month-year"></h2>
+              <span class="nav-btn" id="next-month">&#10095;</span>
             </div>
+            <div id="calendar-days">
+              <div>MON</div><div>TUE</div><div>WED</div><div>THU</div><div>FRI</div><div>SAT</div><div>SUN</div>
+            </div>
+            <div id="calendar-dates"></div>
           </div>
         </div>
-        <!-- End Row -->
-        
       </div>
     </div>
   </div>
+</div>
 
-  <!-- Bootstrap JS (jQuery and Popper for Bootstrap 4) -->
-  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
-  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script>
+  let currentDate = new Date();
+  const renderCalendar = (dateObj) => {
+    const calendarDates = document.getElementById("calendar-dates");
+    const monthYear = document.getElementById("month-year");
+    calendarDates.innerHTML = "";
 
-  <!-- Simple Vanilla JS Calendar Script -->
-  <script>
-    let currentDate = new Date();
+    const year = dateObj.getFullYear();
+    const month = dateObj.getMonth();
+    const firstDayOfMonth = new Date(year, month, 1).getDay();
+    const lastDateOfMonth = new Date(year, month + 1, 0).getDate();
 
-    const renderCalendar = (dateObj) => {
-      const calendarDates = document.getElementById("calendar-dates");
-      const monthYear = document.getElementById("month-year");
-      calendarDates.innerHTML = "";
+    const offset = (firstDayOfMonth === 0) ? 6 : firstDayOfMonth - 1;
+    const monthNames = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+    monthYear.textContent = monthNames[month] + " " + year;
 
-      const year = dateObj.getFullYear();
-      const month = dateObj.getMonth();
-
-      const firstDayOfMonth = new Date(year, month, 1).getDay();
-      const lastDateOfMonth = new Date(year, month + 1, 0).getDate();
-
-      // Convert Sunday=0 to Monday-based layout: if 0 then offset = 6, else offset = day - 1
-      const offset = (firstDayOfMonth === 0) ? 6 : firstDayOfMonth - 1;
-
-      const monthNames = [
-        "January", "February", "March", "April", "May", "June",
-        "July", "August", "September", "October", "November", "December"
-      ];
-      monthYear.textContent = monthNames[month] + " " + year;
-
-      for (let i = 0; i < offset; i++) {
-        const emptyCell = document.createElement("div");
-        calendarDates.appendChild(emptyCell);
+    for (let i = 0; i < offset; i++) { calendarDates.appendChild(document.createElement("div")); }
+    for (let day = 1; day <= lastDateOfMonth; day++) {
+      const dayCell = document.createElement("div");
+      dayCell.textContent = day;
+      if (day === new Date().getDate() && month === new Date().getMonth() && year === new Date().getFullYear()) {
+        dayCell.classList.add("today");
       }
-
-      for (let day = 1; day <= lastDateOfMonth; day++) {
-        const dayCell = document.createElement("div");
-        dayCell.textContent = day;
-
-        const isToday = (
-          day === new Date().getDate() &&
-          month === new Date().getMonth() &&
-          year === new Date().getFullYear()
-        );
-        if (isToday) {
-          dayCell.classList.add("today");
-        }
-        calendarDates.appendChild(dayCell);
-      }
-    };
-
-    document.getElementById("prev-month").addEventListener("click", () => {
-      currentDate.setMonth(currentDate.getMonth() - 1);
-      renderCalendar(currentDate);
-    });
-    document.getElementById("next-month").addEventListener("click", () => {
-      currentDate.setMonth(currentDate.getMonth() + 1);
-      renderCalendar(currentDate);
-    });
-
-    renderCalendar(currentDate);
-  </script>
+      calendarDates.appendChild(dayCell);
+    }
+  };
+  document.getElementById("prev-month").addEventListener("click", () => { currentDate.setMonth(currentDate.getMonth() - 1); renderCalendar(currentDate); });
+  document.getElementById("next-month").addEventListener("click", () => { currentDate.setMonth(currentDate.getMonth() + 1); renderCalendar(currentDate); });
+  renderCalendar(currentDate);
+</script>
 </body>
 </html>
-
-

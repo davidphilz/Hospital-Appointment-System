@@ -294,13 +294,13 @@
         </div>
         <div class="col-md-4">
           <div class="card info-card h-100 text-center">
-            <img src="img/patient.jpg" alt="Patient" class="img-fluid" loading="lazy">
+            <img src="img/Alert.jpg" alt="Patient" class="img-fluid" loading="lazy">
             <div class="card-body">
-              <h5 class="card-title">Create Account For More Care</h5>
+              <h5 class="card-title">Alert System</h5>
               <p class="card-text">
-                Sign up to access your medical records, schedule appointments, and manage your health online.
+              Sign in to receive critical alerts, monitor hospital updates
               </p>
-              <a href="patientsignup.php" class="btn btn-primary">Create Account</a>
+              <a href="Alert system/login.php" class="btn btn-primary">Click Here!</a>
             </div>
           </div>
         </div>

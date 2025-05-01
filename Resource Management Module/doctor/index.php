@@ -1,12 +1,38 @@
 <?php
 session_start();
+include("../include/header.php");
+
 if (!isset($_SESSION['doctor'])) {
     header("Location: doctorlogin.php");
     exit();
 }
 
-include("../include/header.php");
+$servername   = "localhost";
+$db_username  = "root";
+$db_password  = "";
+$dbname       = "hospital_appointment_system";
+
+$conn = new mysqli($servername, $db_username, $db_password, $dbname);
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['mark_read_id'])) {
+    $alertId = intval($_POST['mark_read_id']);
+    $stmtMark = $conn->prepare("UPDATE alerts SET is_read = 1 WHERE id = ?");
+    $stmtMark->bind_param("i", $alertId);
+    $stmtMark->execute();
+}
+
+
+$alerts = $conn->query(
+    "SELECT id, title, message, sender_role, created_at, is_read
+       FROM alerts
+      ORDER BY created_at DESC"
+);
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -15,9 +41,8 @@ include("../include/header.php");
   <title>Doctor's Dashboard</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
-
   <style>
-    body {
+     body {
       background-color: #f4f6f9;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       margin: 0;
@@ -225,78 +250,73 @@ include("../include/header.php");
                 <span class="nav-btn" id="next-month">&#10095;</span>
               </div>
               <div id="calendar-days">
-                <div>MON</div>
-                <div>TUE</div>
-                <div>WED</div>
-                <div>THU</div>
-                <div>FRI</div>
-                <div>SAT</div>
-                <div>SUN</div>
+                <div>MON</div><div>TUE</div><div>WED</div>
+                <div>THU</div><div>FRI</div><div>SAT</div><div>SUN</div>
               </div>
               <div id="calendar-dates"></div>
             </div>
           </div>
         </div>
+
+        <!-- Notifications Section -->
+        <div class="mt-4">
+          <h5>Notifications</h5>
+          <?php if ($alerts && $alerts->num_rows > 0): ?>
+            <?php while ($row = $alerts->fetch_assoc()): ?>
+              <form method="post" class="mb-3">
+                <div class="alert <?php echo $row['is_read'] ? 'alert-secondary' : 'alert-info'; ?> d-flex justify-content-between align-items-center">
+                  <div>
+                    <strong><?php echo htmlspecialchars($row['title']); ?></strong><br>
+                    <small class="text-muted">by <?php echo htmlspecialchars($row['sender_role']); ?> at <?php echo date('M d, Y H:i', strtotime($row['created_at'])); ?></small>
+                    <p class="mb-0 mt-2"><?php echo nl2br(htmlspecialchars($row['message'])); ?></p>
+                  </div>
+                  <?php if (!$row['is_read']): ?>
+                    <button type="submit" name="mark_read_id" value="<?php echo $row['id']; ?>" class="btn btn-sm btn-outline-light">Mark as Read</button>
+                  <?php endif; ?>
+                </div>
+              </form>
+            <?php endwhile; ?>
+          <?php else: ?>
+            <p class="text-muted">No notifications to show.</p>
+          <?php endif; ?>
+        </div>
+
       </div>
+
     </div>
   </div>
 
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"></script>
-
   <script>
     let currentDate = new Date();
-
-    const renderCalendar = (dateObj) => {
-      const calendarDates = document.getElementById("calendar-dates");
-      const monthYear = document.getElementById("month-year");
-      calendarDates.innerHTML = "";
+    function renderCalendar(dateObj) {
+      const datesEl = document.getElementById("calendar-dates");
+      const monthYearEl = document.getElementById("month-year");
+      datesEl.innerHTML = "";
 
       const year = dateObj.getFullYear();
       const month = dateObj.getMonth();
+      const firstDay = new Date(year, month, 1).getDay();
+      const lastDate = new Date(year, month + 1, 0).getDate();
+      const offset = (firstDay === 0) ? 6 : firstDay - 1;
 
-      const firstDayOfMonth = new Date(year, month, 1).getDay();
-      const lastDateOfMonth = new Date(year, month + 1, 0).getDate();
+      const names = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+      monthYearEl.textContent = names[month] + " " + year;
 
-      // Convert Sunday=0 to Monday-based layout
-      const offset = (firstDayOfMonth === 0) ? 6 : firstDayOfMonth - 1;
-
-      const monthNames = [
-        "January", "February", "March", "April", "May", "June",
-        "July", "August", "September", "October", "November", "December"
-      ];
-      monthYear.textContent = monthNames[month] + " " + year;
-
-      for (let i = 0; i < offset; i++) {
-        const emptyCell = document.createElement("div");
-        calendarDates.appendChild(emptyCell);
-      }
-
-      for (let day = 1; day <= lastDateOfMonth; day++) {
-        const dayCell = document.createElement("div");
-        dayCell.textContent = day;
-
-        const isToday = (
-          day === new Date().getDate() &&
-          month === new Date().getMonth() &&
-          year === new Date().getFullYear()
-        );
-        if (isToday) {
-          dayCell.classList.add("today");
+      for (let i=0; i<offset; i++) datesEl.appendChild(document.createElement("div"));
+      for (let d=1; d<=lastDate; d++) {
+        const cell = document.createElement("div");
+        cell.textContent = d;
+        const today = new Date();
+        if (d===today.getDate() && month===today.getMonth() && year===today.getFullYear()) {
+          cell.classList.add("today");
         }
-        calendarDates.appendChild(dayCell);
+        datesEl.appendChild(cell);
       }
-    };
-
-    document.getElementById("prev-month").addEventListener("click", () => {
-      currentDate.setMonth(currentDate.getMonth() - 1);
-      renderCalendar(currentDate);
-    });
-    document.getElementById("next-month").addEventListener("click", () => {
-      currentDate.setMonth(currentDate.getMonth() + 1);
-      renderCalendar(currentDate);
-    });
-
+    }
+    document.getElementById("prev-month").onclick = () => { currentDate.setMonth(currentDate.getMonth()-1); renderCalendar(currentDate); }
+    document.getElementById("next-month").onclick = () => { currentDate.setMonth(currentDate.getMonth()+1); renderCalendar(currentDate); }
     renderCalendar(currentDate);
   </script>
 </body>
