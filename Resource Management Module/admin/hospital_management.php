@@ -185,7 +185,7 @@ $allocated_rooms = array_filter($rooms, fn($r)=> $r['is_allocated']);
       <?php include("sidenav.php"); ?>
     </nav>
     <main class="main-content flex-grow-1">
-      <h2>Admin Dashboard</h2>
+      <h2></h2>
       <div class="card mb-4">
         <div class="card-header bg-primary text-white">Update Capacity</div>
         <div class="card-body">

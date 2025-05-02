@@ -213,7 +213,7 @@ $beds_history = $stmt->fetchAll(PDO::FETCH_ASSOC);
       <?php include("sidenav.php"); ?>
     </nav>
     <main class="main-content">
-      <h2 class="mb-4">Reports &amp; Analytics</h2>
+      <!-- <h2 class="mb-4">Reports &amp; Analytics</h2> -->
 
       <form class="row g-3 mb-5" method="get">
         <div class="col-md-3">

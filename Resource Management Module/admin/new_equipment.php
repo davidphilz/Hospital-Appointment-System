@@ -221,11 +221,9 @@ $drugList = [
 <body>
 <div class="container-fluid px-0">
     <div class="row gx-0 vh-100">
-        <!-- Sidebar Column -->
         <div class="col-md-2 sidebar p-3">
             <?php include("sidenav.php"); ?>
         </div>
-        <!-- Main Content Column -->
         <div class="col-md-10 main-content">
             <div class="container-fluid">
                 <h1 class="dashboard-heading">Manage Equipment & Resources</h1>
