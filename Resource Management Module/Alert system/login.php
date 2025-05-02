@@ -29,7 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Login</title>
+    <title>Alert System Login</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -82,7 +82,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <div class="login-form">
     <form method="post" action="">
-        <h2>Login</h2>
+        <h2>Alert System Login</h2>
         <input type="text" name="username" required placeholder="Username">
         <input type="password" name="password" required placeholder="Password">
         <button type="submit">Login</button>

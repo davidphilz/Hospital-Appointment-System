@@ -240,7 +240,7 @@ $beds_history = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <canvas id="bedsChart" height="100"></canvas>
       </section>
 
-      <!-- <section class="mt-5">
+      <section class="mt-5">
         <h3 class="mb-3">Mark Bed as Occupied</h3>
         <form method="post" class="row g-3 align-items-end">
           <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
@@ -252,7 +252,7 @@ $beds_history = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <button type="submit" class="btn btn-success">Mark Occupied</button>
           </div>
         </form>
-      </section> -->
+      </section>
     </main>
   </div>
 

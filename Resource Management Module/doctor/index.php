@@ -269,7 +269,7 @@ $alerts = $conn->query(
                     <p class="mb-0 mt-2"><?php echo nl2br(htmlspecialchars($row['message'])); ?></p>
                   </div>
                   <?php if (!$row['is_read']): ?>
-                    <button type="submit" name="mark_read_id" value="<?php echo $row['id']; ?>" class="btn btn-sm btn-outline-light">Mark as Read</button>
+                    <button type="submit" name="mark_read_id" value="<?php echo $row['id']; ?>" class="btn btn-sm btn-danger">Mark as Read</button>
                   <?php endif; ?>
                 </div>
               </form>
