@@ -61,7 +61,8 @@ $current_page = basename($_SERVER['PHP_SELF']);
                             echo '
                             <li class="nav-item"><a href="index.php" class="nav-link text-white"><i class="fas fa-home"></i> Home</a></li>
                             <li class="nav-item"><a href="adminlogin.php" class="nav-link text-white"><i class="fas fa-user-shield"></i> Admin</a></li>
-                            <li class="nav-item"><a href="doctorlogin.php" class="nav-link text-white"><i class="fas fa-user-md"></i> Doctor</a></li>';
+                            <li class="nav-item"><a href="doctorlogin.php" class="nav-link text-white"><i class="fas fa-user-md"></i> Doctor</a></li>
+                            <li class="nav-item"><a href="patient_dashboard.php" class="nav-link text-white"><i class="fas fa-user-injured"></i> Patient</a></li>';
                         }
                     ?>
                 </ul>
