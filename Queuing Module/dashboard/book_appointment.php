@@ -1,129 +1,141 @@
 <?php
-session_start();
-if (!isset($_SESSION['id'])) {
-    header("Location: /Hospital-Appointment-System/Queuing Module/auth/login.php");
-    exit();
-}
+// improved_appointment.php
+// Handle form submission
+$feedback = '';
+$feedbackClass = '';
 
-include('../includes/db.php'); // Database connection
-
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    // Sanitize input
-    $patient_id = $_SESSION['id'];
-    $problem_description = mysqli_real_escape_string($conn, $_POST['problem_description']);
-    $urgency = mysqli_real_escape_string($conn, $_POST['urgency']);
-
-    // Map problem description to hospital unit (basic keyword matching)
-    $unit = 'General'; // Default unit
-    if (stripos($problem_description, 'skin') !== false) {
-        $unit = 'Dermatology';
-    } elseif (stripos($problem_description, 'heart') !== false) {
-        $unit = 'Cardiology';
-    } elseif (stripos($problem_description, 'bone') !== false) {
-        $unit = 'Orthopedics';
-    }
-
-    // Determine the next available appointment date for the unit
-    $last_appointment_query = "SELECT appointment_date FROM appointments 
-                               WHERE unit = '$unit' AND status = 'pending' 
-                               ORDER BY appointment_date DESC LIMIT 1";
-    $last_appointment_result = mysqli_query($conn, $last_appointment_query);
-
-    if (mysqli_num_rows($last_appointment_result) > 0) {
-        // If there are pending appointments, schedule 30 minutes after the last appointment
-        $last_appointment = mysqli_fetch_assoc($last_appointment_result);
-        $last_appointment_date = new DateTime($last_appointment['appointment_date']);
-        $next_appointment_date = $last_appointment_date->add(new DateInterval('PT30M'));
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $description = trim($_POST['problem_description'] ?? '');
+    $urgency = $_POST['urgency'] ?? '';
+    
+    if (empty($description) || empty($urgency)) {
+        $feedback = 'Error: Please fill in all required fields.';
+        $feedbackClass = 'error';
     } else {
-        // If no pending appointments, schedule 5 hours from now
-        $next_appointment_date = new DateTime();
-        $next_appointment_date->add(new DateInterval('PT5H'));
-    }
+        // TODO: Integrate appointment saving logic here
 
-    $formatted_appointment_date = $next_appointment_date->format('Y-m-d H:i:s');
+        // Set feedback message for successful booking
+        $feedback = 'Your appointment has been successfully booked!';
+        $feedbackClass = 'success';
 
-    // Insert appointment into the database
-    $sql = "INSERT INTO appointments (patient_id, problem_description, unit, priority_level, status, appointment_date) 
-            VALUES ('$patient_id', '$problem_description', '$unit', '$urgency', 'pending', '$formatted_appointment_date')";
-
-    if (mysqli_query($conn, $sql)) {
-        echo "<script>alert('Appointment booked successfully! Your appointment is scheduled for $formatted_appointment_date.'); window.location.href = 'index.php';</script>";
-    } else {
-        echo "Error: " . mysqli_error($conn);
+        // Redirect to the dashboard after successful form submission
+        header('Location: index.php'); // Adjust the URL to your actual dashboard page
+        exit(); // Make sure no further code is executed
     }
 }
 ?>
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Book Appointment</title>
     <style>
+        :root {
+            --font-family: 'Segoe UI', sans-serif;
+            --color-bg: #eef1f5;
+            --color-card: #ffffff;
+            --color-primary: #2a2b38;
+            --color-accent: #ffeba7;
+            --color-error: #dc3545;
+            --color-success: #28a745;
+        }
+        *, *::before, *::after { box-sizing: border-box; }
         body {
-            font-family: Arial, sans-serif;
-            background: #f4f4f4;
             margin: 0;
             padding: 0;
+            font-family: var(--font-family);
+            background-color: var(--color-bg);
+            color: var(--color-primary);
+            line-height: 1.6;
         }
-        .form-container {
+        .container {
             max-width: 600px;
-            margin: 80px auto;
-            padding: 20px;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+            margin: 5rem auto;
+            padding: 2rem;
+            background-color: var(--color-card);
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
-        h2 {
-            color: #2a2b38;
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+        }
+        .feedback {
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            border-left: 4px solid;
+            border-radius: 0.5rem;
+        }
+        .feedback.success {
+            background-color: #e0ffe0;
+            border-color: var(--color-success);
+            color: var(--color-primary);
+        }
+        .feedback.error {
+            background-color: #ffe0e0;
+            border-color: var(--color-error);
+            color: var(--color-primary);
         }
         .form-group {
-            margin: 15px 0;
+            margin-bottom: 1.5rem;
         }
         label {
             display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
         }
-        input, textarea, select {
+        textarea, select {
             width: 100%;
-            padding: 10px;
-            margin-bottom: 10px;
+            padding: 0.75rem;
             border: 1px solid #ccc;
-            border-radius: 5px;
+            border-radius: 0.5rem;
+            font-size: 1rem;
         }
-        button {
-            background: #2a2b38;
-            color: white;
-            padding: 10px 15px;
+        button.btn {
+            width: 100%;
+            padding: 0.75rem;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--color-accent);
+            background-color: var(--color-primary);
             border: none;
-            border-radius: 5px;
+            border-radius: 0.5rem;
             cursor: pointer;
+            transition: background-color 0.3s ease;
         }
-        button:hover {
-            background: #444;
+        button.btn:hover {
+            background-color: #1f202c;
         }
     </style>
 </head>
 <body>
-
-<div class="form-container">
-    <h2>Book an Appointment</h2>
-    <form method="POST" action="">
-        <div class="form-group">
-            <label for="problem_description">Describe Your Problem:</label>
-            <textarea id="problem_description" name="problem_description" rows="5" required></textarea>
-        </div>
-        <div class="form-group">
-            <label for="urgency">Select Urgency Level:</label>
-            <select id="urgency" name="urgency" required>
-                <option value="Emergency">Emergency</option>
-                <option value="High">High</option>
-                <option value="Normal">Normal</option>
-            </select>
-        </div>
-        <button type="submit">Book Appointment</button>
-    </form>
-</div>
-
+    <main class="container" role="main">
+        <h1>Book an Appointment</h1>
+        <?php if ($feedback): ?>
+            <div role="alert" class="feedback <?= htmlspecialchars($feedbackClass, ENT_QUOTES); ?>">
+                <?= htmlspecialchars($feedback, ENT_QUOTES); ?>
+            </div>
+        <?php endif; ?>
+        <form method="post" novalidate>
+            <div class="form-group">
+                <label for="problem_description">Describe Your Problem</label>
+                <textarea id="problem_description" name="problem_description" rows="5" required><?= htmlspecialchars($_POST['problem_description'] ?? '', ENT_QUOTES); ?></textarea>
+            </div>
+            <div class="form-group">
+                <label for="urgency">Urgency Level</label>
+                <select id="urgency" name="urgency" required>
+                    <option value="" disabled <?= empty($_POST['urgency']) ? 'selected' : ''; ?>>Select urgency level</option>
+                    <?php 
+                    $levels = ['Emergency', 'High', 'Normal'];
+                    foreach ($levels as $level): ?>
+                        <option value="<?= $level; ?>" <?= (($_POST['urgency'] ?? '') === $level) ? 'selected' : ''; ?>><?= $level; ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <button type="submit" class="btn">Book Appointment</button>
+        </form>
+    </main>
 </body>
 </html>
