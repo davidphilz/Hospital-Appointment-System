@@ -21,6 +21,30 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $unit = 'Cardiology';
     } elseif (stripos($problem_description, 'bone') !== false) {
         $unit = 'Orthopedics';
+    } elseif (stripos($problem_description, 'bone') !== false) {
+        $unit = 'Orthopedics';
+    } elseif (stripos($problem_description, 'eye') !== false) {
+        $unit = 'Ophthalmology';
+    } elseif (stripos($problem_description, 'ear') !== false) {
+        $unit = 'ENT';
+    } elseif (stripos($problem_description, 'stomach') !== false) {
+        $unit = 'Gastroenterology';
+    } elseif (stripos($problem_description, 'headache') !== false) {
+        $unit = 'Neurology';
+    } elseif (stripos($problem_description, 'cough') !== false) {
+        $unit = 'Pulmonology';
+    } elseif (stripos($problem_description, 'diabetes') !== false) {
+        $unit = 'Endocrinology';
+    } elseif (stripos($problem_description, 'blood') !== false) {
+        $unit = 'Hematology';
+    } elseif (stripos($problem_description, 'cancer') !== false) {
+        $unit = 'Oncology';
+    } elseif (stripos($problem_description, 'pregnancy') !== false) {
+        $unit = 'Obstetrics';
+    } elseif (stripos($problem_description, 'child') !== false) {
+        $unit = 'Pediatrics';
+    } elseif (stripos($problem_description, 'mental') !== false || stripos($problem_description, 'depression') !== false) {
+        $unit = 'Psychiatry';
     }
 
     // Determine the next available appointment date for the unit
