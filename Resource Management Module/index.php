@@ -267,11 +267,14 @@
             </div>
           </div>
           <div class="col-md-4">
-            <div class="news-item">
-              <h5>Annual Health Fair Scheduled</h5>
-              <p>
-                Join us for our Annual Health Fair, featuring free checkups, expert consultations, and wellness workshops.
-              </p>
+            <a href="http://localhost/Hospital-Appointment-System/Queuing%20Module/auth/login.php" style="text-decoration: none; color: inherit;">
+              <div class="news-item" style="cursor: pointer;">
+                <h5>Annual Health Fair Scheduled</h5>
+                <p>
+                  Join us for our Annual Health Fair, featuring free checkups, expert consultations, and wellness workshops.
+                </p>
+              </div>
+             </a>
             </div>
           </div>
         </div>
