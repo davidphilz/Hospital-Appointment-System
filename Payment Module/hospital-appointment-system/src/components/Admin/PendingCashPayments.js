@@ -36,7 +36,7 @@ const PendingCashPayments = () => {
       // Add slight delay before re-fetching
       setTimeout(fetchPendingCashPayments, 500)
 
-      // ✅ Re-fetch updated list instead of filtering manually
+      // Re-fetch updated list instead of filtering manually
       const refreshed = await axios.get(
         'http://localhost:5000/admin/pending-cash-payments',
       )
