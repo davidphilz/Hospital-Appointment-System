@@ -1,12 +1,18 @@
 <?php
 session_start();
+include("../include/connection.php");
+include("../include/header.php");
+
 if (!isset($_SESSION['admin'])) {
     header("Location: adminlogin.php");
     exit();
 }
 
-include("../include/header.php");
-include("../include/connection.php");
+$query = "SELECT COUNT(*) AS total FROM appointments";
+$result = mysqli_query($connect, $query);
+$data = mysqli_fetch_assoc($result);
+
+$_SESSION['total_patient'] = $data['total'];
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -17,6 +23,7 @@ include("../include/connection.php");
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
   <style>
+    /* Add your custom styles */
     body {
       background-color: #f4f6f9;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -97,53 +104,78 @@ include("../include/connection.php");
       margin-bottom: 6px;
     }
     #calendar-wrapper {
-      max-width: 320px;
-      margin: 0 auto;
-      background: #fff;
-      border-radius: 8px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      overflow: hidden;
-    }
-    #calendar-header {
-      background: #dc3545; 
-      color: #fff;
-      padding: 10px 0;
-      display: flex; 
-      align-items: center;
-      justify-content: center;
-    }
-    #calendar-header h2 {
-      margin: 0 15px;
-      font-size: 1.2rem;
-    }
-    #calendar-header .nav-btn {
-      cursor: pointer;
-      font-weight: bold;
-    }
-    #calendar-days, #calendar-dates {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      text-align: center;
-      padding: 10px;
-    }
-    #calendar-days div {
-      font-weight: bold;
-      color: #dc3545;
-    }
-    #calendar-dates div {
-      margin: 5px 0;
-      cursor: pointer;
-      border-radius: 4px;
-      line-height: 2em;
-      transition: background 0.2s;
-    }
-    #calendar-dates div:hover {
-      background: #f1f1f1;
-    }
-    .today {
-      background: #dc3545 !important;
-      color: #fff !important;
-    }
+  max-width: 320px;
+  margin: 0 auto;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  overflow: hidden;
+}
+
+#calendar-header {
+  background: #dc3545;
+  color: #fff;
+  padding: 10px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#calendar-header h2 {
+  margin: 0 15px;
+  font-size: 1.2rem;
+}
+
+#calendar-header .nav-btn {
+  cursor: pointer;
+  font-weight: bold;
+  color: white;
+  font-size: 1.2rem;
+}
+
+#calendar-days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);  /* 7 columns for the days of the week */
+  text-align: center;
+  padding: 5px 0;
+  background-color: #f7f7f7; /* Light grey background */
+}
+
+#calendar-days div {
+  font-weight: bold;
+  color: #dc3545;
+}
+
+#calendar-dates {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);  /* 7 columns for the dates */
+  text-align: center;
+  padding: 5px;
+}
+
+#calendar-dates div {
+  margin: 5px;
+  cursor: pointer;
+  border-radius: 4px;
+  line-height: 2em;
+  transition: background 0.2s;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#calendar-dates div:hover {
+  background: #f1f1f1;
+}
+
+.today {
+  background: #dc3545 !important;
+  color: #fff !important;
+}
+
+#calendar-dates div.empty {
+  visibility: hidden; /* Hide the empty grid cells before the start of the month */
+}
   </style>
 </head>
 <body>
@@ -157,12 +189,10 @@ include("../include/connection.php");
         <div class="row">
           <div class="col-md-8">
             <div class="row g-3">
+              <!-- Total Admins Card -->
               <div class="col-md-4">
                 <?php
                   $ad = mysqli_query($connect, "SELECT * FROM admin");
-                  if (!$ad) {
-                      die("Query Failed: " . mysqli_error($connect));
-                  }
                   $num = mysqli_num_rows($ad);
                 ?>
                 <div class="dashboard-card bg-success">
@@ -175,12 +205,10 @@ include("../include/connection.php");
                   </a>
                 </div>
               </div>
+              <!-- Total Doctors Card -->
               <div class="col-md-4">
                 <?php
                   $doctor = mysqli_query($connect, "SELECT * FROM doctors WHERE status='Approved'");
-                  if (!$doctor) {
-                      die("Query Failed: " . mysqli_error($connect));
-                  }
                   $num2 = mysqli_num_rows($doctor);
                 ?>
                 <div class="dashboard-card bg-info">
@@ -197,11 +225,16 @@ include("../include/connection.php");
                 <div class="dashboard-card bg-warning">
                   <div>
                     <h5>Total Patients</h5>
-                    <div class="big-number">0</div>
+                    <div class="big-number">
+                      <?php echo isset($_SESSION['total_patient']) ? $_SESSION['total_patient'] : 0; ?>
+                    </div>
                   </div>
-                  <i class="fas fa-user-injured"></i>
+                  <a href="view_patients.php" class="text-white">
+                    <i class="fas fa-user-shield"></i>
+                  </a>
                 </div>
               </div>
+              <!-- Total Report Card -->
               <div class="col-md-4">
                 <div class="dashboard-card bg-danger">
                   <div>
@@ -211,12 +244,10 @@ include("../include/connection.php");
                   <i class="fas fa-calendar-check"></i>
                 </div>
               </div>
+              <!-- Unapproved Doctors Card -->
               <div class="col-md-4">
                 <?php
                   $job = mysqli_query($connect, "SELECT * FROM doctors WHERE status = 'pending'");
-                  if (!$job) {
-                      die("Query Failed: " . mysqli_error($connect));
-                  }
                   $num1 = mysqli_num_rows($job);
                 ?>
                 <div class="dashboard-card bg-primary">
@@ -229,6 +260,7 @@ include("../include/connection.php");
                   </a>
                 </div>
               </div>
+              <!-- Total Income Card -->
               <div class="col-md-4">
                 <div class="dashboard-card bg-secondary">
                   <div>
@@ -242,6 +274,7 @@ include("../include/connection.php");
             </div>
           </div>
           <div class="col-md-4 mt-3 mt-md-0">
+            <!-- Calendar Section -->
             <div id="calendar-wrapper">
               <div id="calendar-header">
                 <span class="nav-btn" id="prev-month">&#10094;</span>
@@ -267,60 +300,59 @@ include("../include/connection.php");
 
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"></script>
-
   <script>
-  document.addEventListener("DOMContentLoaded", function() {
-    const calendarDates = document.getElementById("calendar-dates");
-    const monthYear     = document.getElementById("month-year");
-    const prevBtn       = document.getElementById("prev-month");
-    const nextBtn       = document.getElementById("next-month");
-    let currentDate     = new Date();
+    // Calendar JavaScript here
+    document.addEventListener("DOMContentLoaded", function() {
+      const calendarDates = document.getElementById("calendar-dates");
+      const monthYear     = document.getElementById("month-year");
+      const prevBtn       = document.getElementById("prev-month");
+      const nextBtn       = document.getElementById("next-month");
+      let currentDate     = new Date();
 
-    function renderCalendar(dateObj) {
-      calendarDates.innerHTML = "";
-      const year  = dateObj.getFullYear();
-      const month = dateObj.getMonth();
+      function renderCalendar(dateObj) {
+        calendarDates.innerHTML = "";
+        const year  = dateObj.getFullYear();
+        const month = dateObj.getMonth();
+        const firstDay = new Date(year, month, 1).getDay();
+        const offset   = firstDay === 0 ? 6 : firstDay - 1;
+        const lastDate = new Date(year, month + 1, 0).getDate();
 
-      const firstDay = new Date(year, month, 1).getDay();
-      const offset   = firstDay === 0 ? 6 : firstDay - 1;
-      const lastDate = new Date(year, month + 1, 0).getDate();
+        const names = [
+          "January","February","March","April","May","June",
+          "July","August","September","October","November","December"
+        ];
+        monthYear.textContent = `${names[month]} ${year}`;
 
-      const names = [
-        "January","February","March","April","May","June",
-        "July","August","September","October","November","December"
-      ];
-      monthYear.textContent = `${names[month]} ${year}`;
-
-      for (let i = 0; i < offset; i++) {
-        calendarDates.appendChild(document.createElement("div"));
-      }
-
-      for (let day = 1; day <= lastDate; day++) {
-        const cell = document.createElement("div");
-        cell.textContent = day;
-        const now = new Date();
-        if (
-          day === now.getDate() &&
-          month === now.getMonth() &&
-          year === now.getFullYear()
-        ) {
-          cell.classList.add("today");
+        for (let i = 0; i < offset; i++) {
+          calendarDates.appendChild(document.createElement("div"));
         }
-        calendarDates.appendChild(cell);
+
+        for (let day = 1; day <= lastDate; day++) {
+          const cell = document.createElement("div");
+          cell.textContent = day;
+          const now = new Date();
+          if (
+            day === now.getDate() &&
+            month === now.getMonth() &&
+            year === now.getFullYear()
+          ) {
+            cell.classList.add("today");
+          }
+          calendarDates.appendChild(cell);
+        }
       }
-    }
 
-    prevBtn.addEventListener("click", () => {
-      currentDate.setMonth(currentDate.getMonth() - 1);
+      prevBtn.addEventListener("click", () => {
+        currentDate.setMonth(currentDate.getMonth() - 1);
+        renderCalendar(currentDate);
+      });
+      nextBtn.addEventListener("click", () => {
+        currentDate.setMonth(currentDate.getMonth() + 1);
+        renderCalendar(currentDate);
+      });
+
       renderCalendar(currentDate);
     });
-    nextBtn.addEventListener("click", () => {
-      currentDate.setMonth(currentDate.getMonth() + 1);
-      renderCalendar(currentDate);
-    });
-
-    renderCalendar(currentDate);
-  });
   </script>
 </body>
 </html>

@@ -71,6 +71,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             VALUES ('$patient_id', '$problem_description', '$unit', '$urgency', 'pending', '$formatted_appointment_date')";
 
     if (mysqli_query($conn, $sql)) {
+        // Update the total patient count in session
+        $total_patient_query = "SELECT COUNT(*) AS total FROM appointments";
+        $total_patient_result = mysqli_query($conn, $total_patient_query);
+        $total_patient_data = mysqli_fetch_assoc($total_patient_result);
+        $_SESSION['total_patient'] = $total_patient_data['total'];
+
         echo "<script>alert('Appointment booked successfully! Scheduled for $formatted_appointment_date.'); window.location.href = 'index.php';</script>";
     } else {
         echo "Error: " . mysqli_error($conn);
