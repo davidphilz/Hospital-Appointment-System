@@ -23,12 +23,31 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $unit = 'Orthopedics';
     }
 
+    // Determine the next available appointment date for the unit
+    $last_appointment_query = "SELECT appointment_date FROM appointments 
+                               WHERE unit = '$unit' AND status = 'pending' 
+                               ORDER BY appointment_date DESC LIMIT 1";
+    $last_appointment_result = mysqli_query($conn, $last_appointment_query);
+
+    if (mysqli_num_rows($last_appointment_result) > 0) {
+        // If there are pending appointments, schedule 30 minutes after the last appointment
+        $last_appointment = mysqli_fetch_assoc($last_appointment_result);
+        $last_appointment_date = new DateTime($last_appointment['appointment_date']);
+        $next_appointment_date = $last_appointment_date->add(new DateInterval('PT30M'));
+    } else {
+        // If no pending appointments, schedule 5 hours from now
+        $next_appointment_date = new DateTime();
+        $next_appointment_date->add(new DateInterval('PT5H'));
+    }
+
+    $formatted_appointment_date = $next_appointment_date->format('Y-m-d H:i:s');
+
     // Insert appointment into the database
-    $sql = "INSERT INTO appointments (patient_id, problem_description, unit, priority_level, status) 
-            VALUES ('$patient_id', '$problem_description', '$unit', '$urgency', 'pending')";
+    $sql = "INSERT INTO appointments (patient_id, problem_description, unit, priority_level, status, appointment_date) 
+            VALUES ('$patient_id', '$problem_description', '$unit', '$urgency', 'pending', '$formatted_appointment_date')";
 
     if (mysqli_query($conn, $sql)) {
-        echo "<script>alert('Appointment booked successfully!'); window.location.href = 'index.php';</script>";
+        echo "<script>alert('Appointment booked successfully! Your appointment is scheduled for $formatted_appointment_date.'); window.location.href = 'index.php';</script>";
     } else {
         echo "Error: " . mysqli_error($conn);
     }
