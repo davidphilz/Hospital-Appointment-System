@@ -206,10 +206,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['cancel_appointment_id'
                         <td><?php echo htmlspecialchars($appointment['priority_level']); ?></td>
                         <td><?php echo htmlspecialchars($appointment['appointment_date']); ?></td>
                         <td>
-                            <form method="POST" action="" style="display:inline;">
-                                <input type="hidden" name="cancel_appointment_id" value="<?php echo $appointment['id']; ?>">
-                                <button type="submit" class="cancel-button">Cancel</button>
-                            </form>
+                            <?php if ($appointment['status'] === 'Closed'): ?>
+                                <span class="badge bg-secondary">Closed</span>
+                            <?php elseif ($appointment['status'] === 'Paid'): ?>
+                                <span class="badge bg-success">Paid</span>
+                            <?php else: ?>
+                                <a href="payment.php?appointment_id=<?= $appointment['id'] ?>" class="btn btn-sm btn-primary">Pay Now</a>
+                            <?php endif; ?>
                         </td>
                     </tr>
                 <?php } ?>
