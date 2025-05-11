@@ -272,32 +272,37 @@ $alerts = $conn->query(
         </div>
 
         <!-- Notifications Section -->
-        <div class="mt-4">
-          <h5>Notifications</h5>
-          <?php if ($alerts && $alerts->num_rows > 0): ?>
-            <?php while ($row = $alerts->fetch_assoc()): ?>
-              <form method="post" class="mb-3">
-                <div class="alerts <?php echo $row['is_read'] ? 'alert-secondary' : 'alert-info'; ?> d-flex justify-content-between align-items-center">
-                  <div>
-                    <strong><?php echo htmlspecialchars($row['title']); ?></strong><br>
-                    <small class="text-muted">at <?php echo date('M d, Y H:i', strtotime($row['created_at'])); ?></small>
-                    <p class="mb-0 mt-2"><?php echo nl2br(htmlspecialchars($row['message'])); ?></p>
-                  </div>
-                  <?php if (!$row['is_read']): ?>
-                    <button type="submit" name="mark_read_id" value="<?php echo $row['id']; ?>" class="btn btn-sm btn-danger">Mark as Read</button>
-                  <?php endif; ?>
-                </div>
-              </form>
-            <?php endwhile; ?>
-          <?php else: ?>
-            <p class="text-muted">No notifications to show.</p>
+<div class="mt-4">
+  <h5 class="mb-3">Notifications</h5>
+  <?php if ($alerts && $alerts->num_rows > 0): ?>
+    <?php while ($row = $alerts->fetch_assoc()): ?>
+      <form method="post" class="mb-3">
+        <div class="alert d-flex justify-content-between align-items-start 
+            <?php echo $row['is_read'] ? 'alert-secondary' : 'alert-info'; ?> 
+            shadow-sm p-3 rounded">
+          
+          <div class="flex-grow-1">
+            <h6 class="mb-1"><?php echo htmlspecialchars($row['title']); ?></h6>
+            <small class="text-muted">Posted: <?php echo date('M d, Y H:i', strtotime($row['created_at'])); ?></small>
+            <p class="mb-1 mt-2"><?php echo nl2br(htmlspecialchars($row['message'])); ?></p>
+          </div>
+
+          <?php if (!$row['is_read']): ?>
+            <div class="ms-3">
+              <button type="submit" name="mark_read_id" value="<?php echo $row['id']; ?>" 
+                class="btn btn-sm btn-outline-danger">
+                Mark as Read
+              </button>
+            </div>
           <?php endif; ?>
         </div>
+      </form>
+    <?php endwhile; ?>
+  <?php else: ?>
+    <p class="text-muted">No notifications to show.</p>
+  <?php endif; ?>
+</div>
 
-      </div>
-
-    </div>
-  </div>
 
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"></script>
