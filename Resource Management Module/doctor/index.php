@@ -1,22 +1,36 @@
 <?php
 session_start();
+include ("../include/connection.php");
 include("../include/header.php");
 
+// Redirect if not logged in
 if (!isset($_SESSION['doctor'])) {
     header("Location: doctorlogin.php");
     exit();
 }
 
+// Connect to database
 $servername   = "localhost";
 $db_username  = "root";
 $db_password  = "";
 $dbname       = "hospital_appointment_system";
-
 $conn = new mysqli($servername, $db_username, $db_password, $dbname);
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
+// Get doctor ID
+$doctor_id = $_SESSION['doctor'];
+
+// Fetch total appointments for this doctor
+$total_stmt = $conn->prepare("SELECT COUNT(*) AS total FROM appointments WHERE doctor_id = ?");
+$total_stmt->bind_param("i", $doctor_id);
+$total_stmt->execute();
+$total_result = $total_stmt->get_result();
+$total_row = $total_result->fetch_assoc();
+$total_appointments = $total_row['total'];
+
+// Handle marking alert as read
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['mark_read_id'])) {
     $alertId = intval($_POST['mark_read_id']);
     $stmtMark = $conn->prepare("UPDATE alerts SET is_read = 1 WHERE id = ?");
@@ -24,13 +38,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['mark_read_id'])) {
     $stmtMark->execute();
 }
 
+// Fetch alerts
 $alerts = $conn->query(
     "SELECT id, title, message, created_at, is_read
      FROM alerts
      ORDER BY created_at DESC"
 );
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -226,18 +240,21 @@ $alerts = $conn->query(
               </div>
 
               <div class="col-md-4">
-                <div class="dashboard-card bg-success">
-                  <div>
-                    <div class="big-number">0</div>
-                    <h5>Total Appointments</h5>
-                  </div>
-                  <div>
-                    <a href="#" class="text-white">
-                      <i class="fa fa-calendar"></i>
-                    </a>
-                  </div>
-                </div>
-              </div>
+    <div class="dashboard-card bg-success">
+        <div>
+            <!-- Display the total appointments dynamically -->
+            <div class=""><?php echo $total_appointments; ?></div>
+            <h5>Total Appointments</h5>
+        </div>
+        <div>
+            <!-- Link to appointments page -->
+            <a href="appointment.php" class="text-white">
+                <i class="fa fa-calendar"></i>
+            </a>
+        </div>
+    </div>
+</div>
+
             </div>
           </div>
           <div class="col-md-4">

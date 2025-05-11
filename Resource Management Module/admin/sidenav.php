@@ -8,7 +8,7 @@
                     <a href="index.php" class="list-group-item list-group-item-action bg-info text-center text-white">Dashboard</a>
                     <a href="admin.php" class="list-group-item list-group-item-action bg-info text-center text-white">Adminstrators</a>
                     <a href="doctor.php" class="list-group-item list-group-item-action bg-info text-center text-white">Doctors</a>
-                    <a href="" class="list-group-item list-group-item-action bg-info text-center text-white">Patient</a>
+                    <a href="view_patients.php" class="list-group-item list-group-item-action bg-info text-center text-white">Patient</a>
                     <a href="add_staff.php" class="list-group-item list-group-item-action bg-info text-center text-white">Add Staff</a>
                     <a href="notice.php" class="list-group-item list-group-item-action bg-info text-center text-white">Notice</a>
                     <a href="new_equipment.php" class="list-group-item list-group-item-action bg-info text-center text-white">Equipment</a>

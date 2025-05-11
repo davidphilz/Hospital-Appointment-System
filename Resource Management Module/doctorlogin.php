@@ -4,33 +4,35 @@ include("include/connection.php");
 
 $show = "";
 
-if(isset($_POST['login'])){
+if (isset($_POST['login'])) {
 
     $username = trim($_POST['username']);
     $password = trim($_POST['password']);
 
     $error = array();
 
-    if(empty($username)){
+    if (empty($username)) {
         $error['login'] = "Enter Username";
-    } elseif(empty($password)){
+    } elseif (empty($password)) {
         $error['login'] = "Enter Password";
     }
 
-    if(count($error) == 0){
+    if (count($error) == 0) {
         $query = "SELECT * FROM doctors WHERE username='$username' AND password='$password'";
         $result = mysqli_query($connect, $query);
 
-        if(mysqli_num_rows($result) > 0){
+        if (mysqli_num_rows($result) > 0) {
             $row = mysqli_fetch_assoc($result);
 
-            if($row['status'] == "pending"){
+            if ($row['status'] == "pending") {
                 $error['login'] = "Please wait for the admin to confirm approval";
-            } elseif($row['status'] == "Rejected"){
+            } elseif ($row['status'] == "Rejected") {
                 $error['login'] = "Please Try again Later";
             } else {
                 echo "<script>alert('Login Successful');</script>";
                 $_SESSION['doctor'] = $username;
+                $_SESSION['doctor_id'] = $row['id'];  // Store doctor ID in session
+                $_SESSION['doctor_name'] = $row['fullname'];  // Optionally store doctor's full name
                 header("Location: doctor/index.php");
                 exit();
             }
@@ -39,7 +41,7 @@ if(isset($_POST['login'])){
         }
     }
 
-    if(isset($error['login'])){
+    if (isset($error['login'])) {
         $l = $error['login'];
         $show = "<h5 class='text-center alert alert-danger'>$l</h5>";
     } else {

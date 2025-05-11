@@ -11,8 +11,8 @@
     <div class="list-group bg-info" style="height: 90vh;">
         <a href="index.php" class="list-group-item list-group-item-action bg-info text-center text-white">Dashboard</a>
         <a href="" class="list-group-item list-group-item-action bg-info text-center text-white">Patient</a>
-        <a href="#" class="list-group-item list-group-item-action bg-info text-center text-white">Appointment</a>
-        <a href="#" class="list-group-item list-group-item-action bg-info text-center text-white">Report</a>
+        <a href="appointment.php" class="list-group-item list-group-item-action bg-info text-center text-white">Appointment</a>
+        <a href="report.php" class="list-group-item list-group-item-action bg-info text-center text-white">Report</a>
         <a href="doctor_allocate_resources.php" class="list-group-item list-group-item-action bg-info text-center text-white">Allocate Resource</a>
         <a href="hospital_management.php" class="list-group-item list-group-item-action bg-info text-center text-white">Availability</a>
         <a href="notice_form.php" class="list-group-item list-group-item-action bg-info text-center text-white">Send Notice</a>

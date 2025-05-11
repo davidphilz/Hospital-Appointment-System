@@ -13,6 +13,11 @@ $result = mysqli_query($connect, $query);
 $data = mysqli_fetch_assoc($result);
 
 $_SESSION['total_patient'] = $data['total'];
+
+$result = mysqli_query($connect, "SELECT COUNT(*) AS total FROM alerts");
+$row = mysqli_fetch_assoc($result);
+$total_reports = $row['total'];
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -234,17 +239,17 @@ $_SESSION['total_patient'] = $data['total'];
                   </a>
                 </div>
               </div>
-              <!-- Total Report Card -->
               <div class="col-md-4">
                 <div class="dashboard-card bg-danger">
                   <div>
                     <h5>Total Report</h5>
-                    <div class="big-number">0</div>
+                    <div class="big-number"><?= $total_reports ?></div>
                   </div>
-                  <i class="fas fa-calendar-check"></i>
+                  <a href="total_report.php" class="text-white">
+                    <i class="fas fa-calendar-check"></i>
+                  </a>
                 </div>
               </div>
-              <!-- Unapproved Doctors Card -->
               <div class="col-md-4">
                 <?php
                   $job = mysqli_query($connect, "SELECT * FROM doctors WHERE status = 'pending'");
