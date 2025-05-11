@@ -1,8 +1,6 @@
 <?php
 session_start();
-echo "<pre>";
-print_r($_SESSION);
-echo "</pre>";
+
 
 if (!isset($_SESSION['patient_id'])) { // Check for 'patient_id' instead of 'id'
     header("Location: /Hospital-Appointment-System/Queuing Module/auth/login.php");

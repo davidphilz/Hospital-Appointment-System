@@ -8,8 +8,6 @@ if (!isset($_SESSION['patient_id'])) {
     echo "Session not set. Redirecting to login.";
     header("Location: /Hospital-Appointment-System/Queuing Module/auth/login.php");
     exit();
-} else {
-    echo "Session is active. Patient ID: " . $_SESSION['patient_id'];
 }
 
 include('../includes/db.php'); // Database connection
@@ -47,8 +45,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $unit = 'Obstetrics';
     } elseif (stripos($problem_description, 'child') !== false) {
         $unit = 'Pediatrics';
-    } elseif (stripos($problem_description, 'mental') !== false || stripos($problem_description, 'depression') !== false) {
-        $unit = 'Psychiatry';
     }
 
     if ($unit === '') {
@@ -78,12 +74,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             VALUES ('$patient_id', '$problem_description', '$unit', '$urgency', 'pending', '$formatted_appointment_date')";
 
     if (mysqli_query($conn, $sql)) {
-        // Update the total patient count in session
-        $total_patient_query = "SELECT COUNT(*) AS total FROM appointments";
-        $total_patient_result = mysqli_query($conn, $total_patient_query);
-        $total_patient_data = mysqli_fetch_assoc($total_patient_result);
-        $_SESSION['total_patient'] = $total_patient_data['total'];
-
         echo "<script>alert('Appointment booked successfully! Scheduled for $formatted_appointment_date.'); window.location.href = 'index.php';</script>";
     } else {
         echo "Error: " . mysqli_error($conn);
@@ -96,85 +86,61 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <head>
     <title>Book Appointment</title>
     <style>
-        * {
-            box-sizing: border-box;
-        }
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f0f2f5;
+            font-family: Arial, sans-serif;
+            background: #f4f4f4;
             margin: 0;
             padding: 0;
         }
         .form-container {
             max-width: 600px;
             margin: 80px auto;
-            padding: 30px;
-            background: #fff;
-            border-radius: 12px;
-            box-shadow: 0 5px 25px rgba(0,0,0,0.1);
-            overflow: hidden;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
         }
         h2 {
-            margin-bottom: 20px;
-            color: #333;
-            text-align: center;
-        }
-        .form-group {
-            margin-bottom: 20px;
+            color: #2a2b38;
         }
         label {
-            font-weight: 600;
-            margin-bottom: 8px;
             display: block;
-            color: #555;
+            margin: 10px 0 5px;
         }
-        input, textarea, select {
+        input, select, button {
             width: 100%;
-            padding: 12px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            resize: vertical;
-            font-size: 15px;
-        }
-        textarea {
-            min-height: 100px;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
         }
         button {
-            width: 100%;
-            padding: 12px;
-            background-color: #2a2b38;
+            background: #5cb85c;
             color: white;
-            font-size: 16px;
             border: none;
-            border-radius: 8px;
             cursor: pointer;
-            transition: background 0.3s;
         }
         button:hover {
-            background-color: #444;
+            background: #4cae4c;
         }
     </style>
 </head>
 <body>
-
-<div class="form-container">
-    <h2>Book an Appointment</h2>
-    <form method="POST" action="">
-        <div class="form-group">
+    <div class="form-container">
+        <h2>Book an Appointment</h2>
+        <form method="POST" action="">
             <label for="problem_description">Describe Your Problem:</label>
-            <textarea id="problem_description" name="problem_description" required></textarea>
-        </div>
-        <div class="form-group">
+            <input type="text" id="problem_description" name="problem_description" required>
+
             <label for="urgency">Select Urgency Level:</label>
             <select id="urgency" name="urgency" required>
-                <option value="Emergency">Emergency</option>
-                <option value="High">High</option>
                 <option value="Normal">Normal</option>
+                <option value="Urgent">Urgent</option>
+                <option value="Critical">Critical</option>
             </select>
-        </div>
-        <button type="submit">Book Appointment</button>
-    </form>
-</div>
 
+            <button type="submit">Book Appointment</button>
+        </form>
+    </div>
 </body>
 </html>
