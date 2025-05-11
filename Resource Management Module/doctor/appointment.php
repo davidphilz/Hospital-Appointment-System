@@ -26,13 +26,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ongoing_appointment_i
     $update->execute();
 }
 
-// Handle redirection to cancellation details
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['view_cancellation_details_id'])) {
-    $cancellation_id = intval($_POST['view_cancellation_details_id']);
-    header("Location: cancellation_details.php?appointment_id=" . $cancellation_id);
-    exit();
-}
+// Fetch unread cancellation notifications
+$notifStmt = $connect->prepare(
+    "SELECT c.appointment_id, c.reason, c.cancelled_by, c.created_at, n.id AS notif_id
+     FROM doctor_notifications n
+     JOIN appointment_cancellations c ON n.cancellation_id = c.id
+     WHERE n.doctor_id = ? AND n.is_read = 0
+     ORDER BY c.created_at DESC"
+);
+$notifStmt->bind_param("i", $doctor_id);
+$notifStmt->execute();
+$notifications = $notifStmt->get_result();
 
+// Fetch all appointments for doctor
 $query = $connect->prepare("SELECT * FROM appointments WHERE doctor_id = ? ORDER BY appointment_date DESC");
 $query->bind_param("i", $doctor_id);
 $query->execute();
@@ -46,7 +52,7 @@ $result = $query->get_result();
     <title>Doctor Dashboard - Appointments</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
     <style>
-        body {
+         body {
             background-color: #f4f6f9;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
@@ -133,8 +139,28 @@ $result = $query->get_result();
         <!-- Main Content -->
         <div class="col-md-10 content-wrapper">
             <div class="appointments-container">
-                <h3 class="text-center">Welcome, Dr. <?php echo htmlspecialchars($_SESSION['doctor_name']); ?></h3>
+                <h3 class="text-center"><?php echo htmlspecialchars($_SESSION['doctor_name']); ?></h3>
                 <h4 class="my-4 text-center">My Appointments</h4>
+
+                <!-- Cancellation Notifications -->
+                <?php if ($notifications->num_rows > 0): ?>
+                    <div class="mb-4">
+                        <h5>New Cancellation Notices</h5>
+                        <?php while ($note = $notifications->fetch_assoc()): ?>
+                            <div class="alert alert-danger">
+                                <strong>Appointment #<?= htmlspecialchars($note['appointment_id']) ?> cancelled on <?= htmlspecialchars($note['created_at']) ?></strong><br>
+                                <em>By: <?= htmlspecialchars($note['cancelled_by']) ?></em><br>
+                                <p>Reason: <?= nl2br(htmlspecialchars($note['reason'])) ?></p>
+                            </div>
+                            <?php
+                            // mark as read
+                            $mark = $connect->prepare("UPDATE doctor_notifications SET is_read = 1 WHERE id = ?");
+                            $mark->bind_param("i", $note['notif_id']);
+                            $mark->execute();
+                            ?>
+                        <?php endwhile; ?>
+                    </div>
+                <?php endif; ?>
 
                 <?php if ($result->num_rows > 0): ?>
                     <?php while ($row = $result->fetch_assoc()):
@@ -155,11 +181,7 @@ $result = $query->get_result();
                             <p><strong>Date:</strong> <?php echo $dt; ?></p>
                             <p>
                                 <strong>Status:</strong>
-                                <span class="<?php 
-                                    echo $st==='Completed'?'text-secondary':
-                                        ($st==='Pending'?'text-warning':
-                                        ($st==='Ongoing'?'text-info':'text-danger'));
-                                ?>">
+                                <span class="<?php echo $st==='Completed'?'text-secondary':($st==='Pending'?'text-warning':($st==='Ongoing'?'text-info':'text-danger')); ?>">
                                     <?php echo $st; ?>
                                 </span>
                             </p>
@@ -169,26 +191,36 @@ $result = $query->get_result();
                                 echo '<p class="text-muted mt-2">Treatment already completed.</p>';
                             } else {
                                 if ($st === 'Pending') {
-                                    echo '
-                                    <form method="POST" class="mt-2 d-inline">
-                                        <input type="hidden" name="ongoing_appointment_id" value="' . $aid . '">
-                                        <button type="submit" class="btn btn-info btn-sm">Mark as Ongoing</button>
-                                    </form>';
+                                    echo '<form method="POST" class="mt-2 d-inline">
+                                            <input type="hidden" name="ongoing_appointment_id" value="' . $aid . '">
+                                            <button type="submit" class="btn btn-info btn-sm">Mark as Ongoing</button>
+                                          </form>';
                                 }
                                 if ($st === 'Ongoing') {
-                                    echo '
-                                    <form method="POST" class="mt-2 d-inline">
-                                        <input type="hidden" name="complete_appointment_id" value="' . $aid . '">
-                                        <button type="submit" class="btn btn-success btn-sm">Mark as Completed</button>
-                                    </form>';
+                                    echo '<form method="POST" class="mt-2 d-inline">
+                                            <input type="hidden" name="complete_appointment_id" value="' . $aid . '">
+                                            <button type="submit" class="btn btn-success btn-sm">Mark as Completed</button>
+                                          </form>';
                                 }
                                 if ($st === 'Cancelled') {
-                                    echo '
-                                    <form method="POST" class="mt-2 d-inline">
-                                        <input type="hidden" name="view_cancellation_details_id" value="' . $aid . '">
-                                        <button type="submit" class="btn btn-danger btn-sm">View Cancellation Details</button>
-                                    </form>
-                                    <p class="text-muted mt-2">This appointment was cancelled.</p>';
+                                    // Inline fetch of cancellation details
+                                    $cs = $connect->prepare(
+                                        "SELECT cancelled_by, reason, created_at FROM appointment_cancellations WHERE appointment_id = ? ORDER BY created_at DESC LIMIT 1"
+                                    );
+                                    $cs->bind_param("i", $aid);
+                                    $cs->execute();
+                                    $cancel = $cs->get_result()->fetch_assoc();
+
+                                    // Only display if we have details
+                                    if ($cancel) {
+                                        echo '<div class="mt-3 p-3 border rounded bg-light">' .
+                                             '<p><strong>Cancelled By:</strong> ' . htmlspecialchars($cancel['cancelled_by']) . '</p>' .
+                                             '<p><strong>On:</strong> ' . htmlspecialchars($cancel['created_at']) . '</p>' .
+                                             '<p><strong>Reason:</strong><br>' . nl2br(htmlspecialchars($cancel['reason'])) . '</p>' .
+                                             '</div>';
+                                    } else {
+                                        echo '<p class="mt-2 text-muted">No cancellation details available.</p>';
+                                    }
                                 }
                             }
                             ?>

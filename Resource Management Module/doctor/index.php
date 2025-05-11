@@ -242,8 +242,7 @@ $alerts = $conn->query(
               <div class="col-md-4">
     <div class="dashboard-card bg-success">
         <div>
-            <!-- Display the total appointments dynamically -->
-            <div class=""><?php echo $total_appointments; ?></div>
+            <!-- <div class=""><?php echo $total_appointments; ?></div> -->
             <h5>Total Appointments</h5>
         </div>
         <div>
