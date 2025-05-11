@@ -29,7 +29,7 @@ if (mysqli_num_rows($result) === 1) {
         // ——— Set session vars ———
         $_SESSION['patient_id']   = $user['id'];
         $_SESSION['patient_name'] = $user['name'];
-        $_SESSION['email']        = $user['email'];
+        $_SESSION['email'] = $user['email']; // Add this line to set the email in the session
 
         // ——— Redirect to the dashboard ———
         header("Location: /Hospital-Appointment-System/Queuing%20Module/dashboard/index.php");

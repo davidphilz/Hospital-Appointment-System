@@ -315,76 +315,76 @@ app.post('/admin/register', (req, res) => {
 app.post('/login', (req, res) => {
   const { email, password } = req.body;
 
-  // First, check in the patients database
-  db.query(
-    'SELECT * FROM patients WHERE email = ?',
-    [email],
-    (err, patientResults) => {
+  console.log('Login Request:', { email, password }); // Debugging
+
+  if (!email || !password) {
+    return res.status(400).json({ message: 'Email and password are required.' });
+  }
+
+  db.query('SELECT * FROM patients WHERE email = ?', [email], (err, patientResults) => {
+    if (err) {
+      console.error('Database error:', err);
+      return res.status(500).json({ message: 'Database error' });
+    }
+
+    if (patientResults.length > 0) {
+      bcrypt.compare(password, patientResults[0].password, (err, isMatch) => {
+        if (err) {
+          console.error('Error verifying password:', err);
+          return res.status(500).json({ message: 'Error verifying password' });
+        }
+
+        if (!isMatch) {
+          console.log('Password does not match.');
+          return res.status(400).json({ message: 'Invalid email or password' });
+        }
+
+        console.log('Login successful for:', patientResults[0].email);
+        return res.json({
+          message: 'Patient login successful',
+          role: 'patient',
+          user: {
+            id: patientResults[0].id,
+            email: patientResults[0].email,
+            name: patientResults[0].name,
+          },
+        });
+      });
+      return; // Stop further execution if patient is found
+    }
+
+    // If no patient found, check in the admins table
+    db.query('SELECT * FROM admins WHERE email = ?', [email], (err, adminResults) => {
       if (err) {
         return res.status(500).json({ message: 'Database error' });
       }
-
-      if (patientResults.length > 0) {
-        // Patient found, verify password
-        bcrypt.compare(password, patientResults[0].password, (err, isMatch) => {
+      if (adminResults.length > 0) {
+        // Admin found, verify password
+        bcrypt.compare(password, adminResults[0].password, (err, isMatch) => {
           if (err) {
             return res.status(500).json({ message: 'Error verifying password' });
           }
           if (!isMatch) {
             return res.status(400).json({ message: 'Invalid email or password' });
           }
-
-          // Successful patient login
+          // Successful admin login
           return res.json({
-            message: 'Patient login successful',
-            role: 'patient',
-            user: {
-              id: patientResults[0].id,
-              email: patientResults[0].email,
-              name: patientResults[0].name,
+            message: 'Admin login successful',
+            role: 'admin',
+            admin: {
+              id: adminResults[0].id,
+              email: adminResults[0].email,
+              name: adminResults[0].name,
+              hospital_role: adminResults[0].hospital_role,
             },
           });
         });
-        return; // Stop further execution if patient is found
+      } else {
+        // Not found in either table
+        return res.status(400).json({ message: 'User not found' });
       }
-
-      // If no patient found, check in the admins table
-      db.query(
-        'SELECT * FROM admins WHERE email = ?',
-        [email],
-        (err, adminResults) => {
-          if (err) {
-            return res.status(500).json({ message: 'Database error' });
-          }
-          if (adminResults.length > 0) {
-            // Admin found, verify password
-            bcrypt.compare(password, adminResults[0].password, (err, isMatch) => {
-              if (err) {
-                return res.status(500).json({ message: 'Error verifying password' });
-              }
-              if (!isMatch) {
-                return res.status(400).json({ message: 'Invalid email or password' });
-              }
-              // Successful admin login
-              return res.json({
-                message: 'Admin login successful',
-                role: 'admin',
-                admin: {
-                  id: adminResults[0].id,
-                  email: adminResults[0].email,
-                  name: adminResults[0].name,
-                  hospital_role: adminResults[0].hospital_role,
-                },
-              });
-            });
-          } else {
-            // Not found in either table
-            return res.status(400).json({ message: 'User not found' });
-          }
-        }
-      );
-    }
-  );
+    });
+  });
 });
 
 //API to update bank details (Admin Only)

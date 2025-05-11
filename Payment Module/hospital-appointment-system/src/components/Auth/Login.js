@@ -15,6 +15,8 @@ const Login = () => {
     setLoading(true)
     setError('')
 
+    console.log('Login Attempt:', { email, password }) // Debugging
+
     try {
       const response = await axios.post('http://localhost:5000/login', {
         email,
@@ -34,10 +36,13 @@ const Login = () => {
 
       if (response.data.role === 'admin') {
         navigate('/admin-dashboard/overview')
+      } else if (response.data.role === 'patient') {
+        navigate('/patient-dashboard')
       } else {
         navigate('/user-dashboard')
       }
     } catch (err) {
+      console.error('Login Error:', err.response?.data || err.message)
       setError(err.response?.data?.message || 'Something went wrong')
     } finally {
       setLoading(false)

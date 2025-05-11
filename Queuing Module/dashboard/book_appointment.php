@@ -5,10 +5,11 @@ session_set_cookie_params([
     'samesite' => 'Lax',
 ]);
 session_start();
-
-if (!isset($_SESSION['patient_id'])) {
-    header("Location: /Hospital-Appointment-System/Queuing%20Module/auth/login.php");
+if (!isset($_SESSION['id'])) {
+    header("Location: /Hospital-Appointment-System/Queuing Module/auth/login.php");
     exit();
+} else {
+    echo "Session is active. Patient ID: " . $_SESSION['patient_id'];
 }
 
 include __DIR__ . '/../includes/db.php';
@@ -16,8 +17,8 @@ include __DIR__ . '/../includes/db.php';
 $problem_description = '';
 $urgency = '';
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $patient_id = (int) $_SESSION['patient_id'];
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $patient_id = $_SESSION['id'];
     $problem_description = mysqli_real_escape_string($conn, $_POST['problem_description']);
     $urgency = mysqli_real_escape_string($conn, $_POST['urgency']);
 
