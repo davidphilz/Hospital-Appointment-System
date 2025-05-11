@@ -1,14 +1,21 @@
 <?php
 session_start();
-if (!isset($_SESSION['id'])) {
+echo "<pre>";
+print_r($_SESSION);
+echo "</pre>";
+
+if (!isset($_SESSION['patient_id'])) {
+    echo "Session not set. Redirecting to login.";
     header("Location: /Hospital-Appointment-System/Queuing Module/auth/login.php");
     exit();
+} else {
+    echo "Session is active. Patient ID: " . $_SESSION['patient_id'];
 }
 
 include('../includes/db.php'); // Database connection
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $patient_id = $_SESSION['id'];
+    $patient_id = $_SESSION['patient_id'];
     $problem_description = mysqli_real_escape_string($conn, $_POST['problem_description']);
     $urgency = mysqli_real_escape_string($conn, $_POST['urgency']);
 

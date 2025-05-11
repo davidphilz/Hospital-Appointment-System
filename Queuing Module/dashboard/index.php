@@ -1,5 +1,9 @@
 <?php
 session_start();
+echo "<pre>";
+print_r($_SESSION);
+echo "</pre>";
+
 if (!isset($_SESSION['patient_id'])) { // Check for 'patient_id' instead of 'id'
     header("Location: /Hospital-Appointment-System/Queuing Module/auth/login.php");
     exit();
@@ -206,13 +210,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['cancel_appointment_id'
                         <td><?php echo htmlspecialchars($appointment['priority_level']); ?></td>
                         <td><?php echo htmlspecialchars($appointment['appointment_date']); ?></td>
                         <td>
-                            <?php if ($appointment['status'] === 'Closed'): ?>
-                                <span class="badge bg-secondary">Closed</span>
-                            <?php elseif ($appointment['status'] === 'Paid'): ?>
-                                <span class="badge bg-success">Paid</span>
-                            <?php else: ?>
-                                <a href="payment.php?appointment_id=<?= $appointment['id'] ?>" class="btn btn-sm btn-primary">Pay Now</a>
-                            <?php endif; ?>
+                            <button class="pay-button" onclick="showPaymentOptions(<?php echo $appointment['id']; ?>)">Pay Now</button>
                         </td>
                     </tr>
                 <?php } ?>
