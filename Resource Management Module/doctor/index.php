@@ -33,14 +33,14 @@ $total_appointments = $total_row['total'];
 // Handle marking alert as read
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['mark_read_id'])) {
     $alertId = intval($_POST['mark_read_id']);
-    $stmtMark = $conn->prepare("UPDATE alert SET is_read = 1 WHERE id = ?");
+    $stmtMark = $conn->prepare("UPDATE alerts SET is_read = 1 WHERE id = ?");
     $stmtMark->bind_param("i", $alertId);
     $stmtMark->execute();
 }
 
-$alert = $conn->query(
+$alerts = $conn->query(
     "SELECT id, title, message, created_at, is_read
-     FROM alert
+     FROM alerts
      ORDER BY created_at DESC"
 );
 ?>
@@ -274,10 +274,10 @@ $alert = $conn->query(
         <!-- Notifications Section -->
         <div class="mt-4">
           <h5>Notifications</h5>
-          <?php if ($alert && $alert->num_rows > 0): ?>
-            <?php while ($row = $alert->fetch_assoc()): ?>
+          <?php if ($alerts && $alerts->num_rows > 0): ?>
+            <?php while ($row = $alerts->fetch_assoc()): ?>
               <form method="post" class="mb-3">
-                <div class="alert <?php echo $row['is_read'] ? 'alert-secondary' : 'alert-info'; ?> d-flex justify-content-between align-items-center">
+                <div class="alerts <?php echo $row['is_read'] ? 'alert-secondary' : 'alert-info'; ?> d-flex justify-content-between align-items-center">
                   <div>
                     <strong><?php echo htmlspecialchars($row['title']); ?></strong><br>
                     <small class="text-muted">at <?php echo date('M d, Y H:i', strtotime($row['created_at'])); ?></small>
