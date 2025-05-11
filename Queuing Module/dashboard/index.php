@@ -184,7 +184,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['cancel_appointment_id'
     </div>
 
     <div class="actions">
-        <a href="book_appointment.php">Book Appointment</a>
+       <a href="/Hospital-Appointment-System/Queuing%20Module/dashboard/book_appointment.php">Book an Appointment</a>
         <a href="/Hospital-Appointment-System/Queuing Module/auth/logout.php" class="logout-button">Logout</a>
     </div>
 
