@@ -4,6 +4,7 @@ const mysql = require('mysql2')
 const cors = require('cors')
 const bodyParser = require('body-parser')
 const bcrypt = require('bcrypt') // import bcrypt for password encryption
+const jwt = require('jsonwebtoken') // Used for token generation
 
 const axios = require('axios')
 
@@ -37,6 +38,25 @@ db.connect((err) => {
 // Flutterwave configuration using Axios
 const FLW_BASE_URL = 'https://api.flutterwave.com/v3'
 const FLW_SECRET_KEY = process.env.FLW_SECRET_KEY
+
+// Middleware to verify token
+function verifyToken(req, res, next) {
+    const token = req.query.token;
+
+    if (!token) {
+        return res.status(401).json({ message: 'Access denied. No token provided.' });
+    }
+
+    try {
+        const decoded = jwt.verify(token, '2004'); // Replace with your secret key
+        console.log('Decoded token:', decoded); // Debugging
+        req.user = decoded; // Attach the decoded token to the request
+        next();
+    } catch (err) {
+        console.error('Token verification failed:', err);
+        res.status(400).json({ message: 'Invalid token.' });
+    }
+}
 
 //Route to initiate a Flutterwave payment
 app.post('/flutterwave/pay', async (req, res) => {
@@ -87,6 +107,52 @@ app.post('/flutterwave/pay', async (req, res) => {
       error: error.response ? error.response.data : error.message,
     })
   }
+})
+
+// Example route for Flutterwave payment
+app.get('/flutterwave/pay', (req, res) => {
+    const { email, appointmentId } = req.query;
+
+    if (!email || !appointmentId) {
+        return res.status(400).json({ message: 'Email and appointment ID are required.' });
+    }
+
+    console.log('Processing Flutterwave Payment for:', email, 'Appointment ID:', appointmentId);
+
+    res.send(`Processing Flutterwave Payment for ${email}, Appointment ID: ${appointmentId}`);
+})
+
+//Route to process a bank transfer
+app.get('/bank-transfer', (req, res) => {
+    const { email, appointmentId } = req.query;
+
+    if (!email || !appointmentId) {
+        return res.status(400).json({ message: 'Email and appointment ID are required.' });
+    }
+
+    console.log('Processing Bank Transfer for:', email, 'Appointment ID:', appointmentId);
+
+    res.send(`Processing Bank Transfer for ${email}, Appointment ID: ${appointmentId}`);
+})
+
+//Route to process a cash payment
+app.get('/cash-payment', verifyToken, (req, res) => {
+    const { email, appointmentId } = req.user;
+
+    // Use the email and appointmentId to process the cash payment
+    res.send(
+        `Processing Cash Payment for ${email}, Appointment ID: ${appointmentId}`
+    );
+})
+
+//Route to process an HMO claim
+app.get('/hmo-claim', verifyToken, (req, res) => {
+    const { email, appointmentId } = req.user;
+
+    // Use the email and appointmentId to process the HMO claim
+    res.send(
+        `Processing HMO Claim for ${email}, Appointment ID: ${appointmentId}`
+    );
 })
 
 //Success route after flutterwave payment
@@ -176,6 +242,45 @@ app.post('/user/register', (req, res) => {
   })
 })
 
+// Patient Registration
+app.post('/patient/register', (req, res) => {
+  const { name, email, password } = req.body;
+
+  // Validate input
+  if (!name || !email || !password) {
+    return res.status(400).json({ message: 'All fields are required.' });
+  }
+
+  // Check if the patient already exists
+  db.query('SELECT * FROM patients WHERE email = ?', [email], (err, results) => {
+    if (err) {
+      return res.status(500).json({ message: 'Database error' });
+    }
+    if (results.length > 0) {
+      return res.status(400).json({ message: 'Patient already registered' });
+    }
+
+    // Encrypt password before saving to the database
+    bcrypt.hash(password, 10, (err, hash) => {
+      if (err) {
+        return res.status(500).json({ message: 'Error encrypting password' });
+      }
+
+      // Insert new patient into the database
+      db.query(
+        'INSERT INTO patients (name, email, password) VALUES (?, ?, ?)',
+        [name, email, hash],
+        (err, result) => {
+          if (err) {
+            return res.status(500).json({ message: 'Database error' });
+          }
+          res.status(201).json({ message: 'Patient registered successfully' });
+        }
+      );
+    });
+  });
+});
+
 //Admin Registration
 app.post('/admin/register', (req, res) => {
   const { name, email, password, hospital_role, adminCode } = req.body
@@ -206,92 +311,81 @@ app.post('/admin/register', (req, res) => {
   })
 })
 
-// UNIFIED LOGIN
+// Unified Login
 app.post('/login', (req, res) => {
-  const { email, password } = req.body
+  const { email, password } = req.body;
 
-  //First, Check in the users database
+  // First, check in the patients database
   db.query(
-    'SELECT * FROM users WHERE email = ?',
+    'SELECT * FROM patients WHERE email = ?',
     [email],
-    (err, userResults) => {
+    (err, patientResults) => {
       if (err) {
-        return res.status(500).json({ message: 'Database error' })
+        return res.status(500).json({ message: 'Database error' });
       }
 
-      if (userResults.length > 0) {
-        //user found, verify password
-        bcrypt.compare(password, userResults[0].password, (err, isMatch) => {
+      if (patientResults.length > 0) {
+        // Patient found, verify password
+        bcrypt.compare(password, patientResults[0].password, (err, isMatch) => {
           if (err) {
-            return res.status(500).json({ message: 'Error verifying password' })
+            return res.status(500).json({ message: 'Error verifying password' });
           }
           if (!isMatch) {
-            return res
-              .status(400)
-              .json({ message: 'Invalid email or password' })
+            return res.status(400).json({ message: 'Invalid email or password' });
           }
 
-          //successful user login
+          // Successful patient login
           return res.json({
-            message: 'User login successful',
-            role: 'user',
+            message: 'Patient login successful',
+            role: 'patient',
             user: {
-              id: userResults[0].id,
-              email: userResults[0].email,
-              name: userResults[0].name,
-              hospital_role: null, // users don't have this
+              id: patientResults[0].id,
+              email: patientResults[0].email,
+              name: patientResults[0].name,
             },
-          })
-        })
-        return // Stop further execution if user is found
+          });
+        });
+        return; // Stop further execution if patient is found
       }
 
-      //If no user found, check in the admins table
+      // If no patient found, check in the admins table
       db.query(
         'SELECT * FROM admins WHERE email = ?',
         [email],
         (err, adminResults) => {
           if (err) {
-            return res.status(500).json({ message: 'Database error' })
+            return res.status(500).json({ message: 'Database error' });
           }
           if (adminResults.length > 0) {
-            //Admin found, verify password
-            bcrypt.compare(
-              password,
-              adminResults[0].password,
-              (err, isMatch) => {
-                if (err) {
-                  return res
-                    .status(500)
-                    .json({ message: 'Error verifying password' })
-                }
-                if (!isMatch) {
-                  return res
-                    .status(400)
-                    .json({ message: 'Invalid email or password' })
-                }
-                // Successful admin login
-                return res.json({
-                  message: 'Admin login successful',
-                  role: 'admin',
-                  admin: {
-                    id: adminResults[0].id,
-                    email: adminResults[0].email,
-                    name: adminResults[0].name,
-                    hospital_role: adminResults[0].hospital_role,
-                  },
-                })
-              },
-            )
+            // Admin found, verify password
+            bcrypt.compare(password, adminResults[0].password, (err, isMatch) => {
+              if (err) {
+                return res.status(500).json({ message: 'Error verifying password' });
+              }
+              if (!isMatch) {
+                return res.status(400).json({ message: 'Invalid email or password' });
+              }
+              // Successful admin login
+              return res.json({
+                message: 'Admin login successful',
+                role: 'admin',
+                admin: {
+                  id: adminResults[0].id,
+                  email: adminResults[0].email,
+                  name: adminResults[0].name,
+                  hospital_role: adminResults[0].hospital_role,
+                },
+              });
+            });
           } else {
             // Not found in either table
-            return res.status(400).json({ message: 'User not found ' })
+            return res.status(400).json({ message: 'User not found' });
           }
-        },
-      )
-    },
-  )
-})
+        }
+      );
+    }
+  );
+});
 
 //API to update bank details (Admin Only)
 app.post('/admin/update-bank-details', (req, res) => {
@@ -376,53 +470,75 @@ app.get('/admin/pending-transfers', (req, res) => {
 
 //API to approve/reject bank transfer (Admin)
 app.post('/admin/approve-bank-transfer', (req, res) => {
-  const { transfer_id, status } = req.body
+  const { transfer_id, status } = req.body;
 
-  // Validate input
   if (!transfer_id || !status) {
-    return res.status(400).json({ message: 'All fields are required.' })
+    return res.status(400).json({ message: 'All fields are required.' });
   }
 
-  //Fetch payment details before updating the status
+  // Fetch payment details before updating the status
   db.query(
     'SELECT * FROM bank_transfers WHERE id = ?',
     [transfer_id],
     (err, transferDetails) => {
       if (err || transferDetails.length === 0) {
-        console.error('Error fetching bank transfer details: ', err)
+        console.error('Error fetching bank transfer details: ', err);
         return res
           .status(500)
-          .json({ message: 'Error fetching bank transfer details.' })
+          .json({ message: 'Error fetching bank transfer details.' });
       }
 
-      const { user_email, amount } = transferDetails[0]
+      const { user_email, amount } = transferDetails[0];
 
-      //Update transfer status
+      // Update transfer status
       db.query(
         'UPDATE bank_transfers SET status = ? WHERE id = ?',
         [status, transfer_id],
         (err, updateResult) => {
           if (err) {
-            console.error('Error updating bank transfer status: ', err)
+            console.error('Error updating bank transfer status: ', err);
             return res
               .status(500)
-              .json({ message: 'Error updating bank transfer status.' })
+              .json({ message: 'Error updating bank transfer status.' });
           }
 
-          //if approved, insert into receipts
+          // If approved, insert into receipts and payments
           if (status === 'Approved') {
             const receiptQuery =
-              'INSERT INTO receipts (user_email, amount, payment_method, status) VALUES (?, ?, ?, ?)'
+              'INSERT INTO receipts (user_email, amount, payment_method, status) VALUES (?, ?, ?, ?)';
             db.query(
               receiptQuery,
               [user_email, amount, 'Offline Bank Transfer', 'Completed'],
               (err, receiptResult) => {
                 if (err) {
-                  console.error('Error inserting into receipts: ', err)
+                  console.error('Error inserting into receipts: ', err);
                   return res
                     .status(500)
-                    .json({ message: 'Error generating receipt' })
+                    .json({ message: 'Error generating receipt.' });
                 }
+
+                // Insert into payments table
+                const paymentQuery = `
+                  INSERT INTO payments (name, email, unit, problem_description, amount_paid, time_completed)
+  SELECT p.name, p.email, a.unit, a.problem_description, ?, NOW()
+  FROM patients p
+  JOIN appointments a ON p.id = a.patient_id
+  WHERE p.email = ?
+                `;
+                db.query(
+                  paymentQuery,
+                  [amount, user_email],
+                  (err, paymentResult) => {
+                    if (err) {
+                      console.error('Error inserting into payments table: ', err);
+                      return res
+                        .status(500)
+                        .json({ message: 'Error saving payment details.' });
+                    }
+
+                    console.log('Payment details saved successfully.');
+                  })
+                
 
                 // Send email notification
                 const transporter = nodemailer.createTransport({
@@ -450,31 +566,33 @@ app.post('/admin/approve-bank-transfer', (req, res) => {
                 }
 
                 transporter.sendMail(mailOptions, (err, info) => {
-                  if (err) {
-                    console.error('Error sending email: ', err)
-                  } else {
-                    console.log('Email sent:', info.response)
-                  }
-                })
+                    if (err) {
+                      console.error('Error inserting into payments table: ', err);
+                      return res
+                        .status(500)
+                        .json({ message: 'Error saving payment details.' });
+                    }
 
-                //Only send response after receipt is sucessfully inserted
-                return res.json({
-                  message:
-                    'Bank Transfer approved and receipt generated successfully.',
-                })
-              },
-            )
+                    console.log('Payment details saved successfully.');
+                    return res.json({
+                      message:
+                        'Bank Transfer approved, receipt generated, and payment details saved.',
+                    });
+                  }
+                );
+              }
+            );
           } else {
-            //if rejected, simply return a response
+            // If rejected, simply return a response
             return res.json({
               message: `Bank Transfer ${status.toLowerCase()} successfully.`,
-            })
+            });
           }
-        },
-      )
-    },
-  )
-})
+        }
+      );
+    }
+  );
+});
 
 //API to initiate Cash Payment
 app.post('/user/cash-payment', (req, res) => {
@@ -561,8 +679,35 @@ app.post('/admin/cash-payment/approve', (req, res) => {
                   .status(500)
                   .json({ message: 'Error generating receipt.' })
               }
+
+              
             },
           )
+
+          // Insert into payments table
+          const paymentQuery = `
+          INSERT INTO payments (name, email, unit, problem_description, amount_paid, time_completed)
+  SELECT p.name, p.email, a.unit, a.problem_description, ?, NOW()
+  FROM patients p
+  JOIN appointments a ON p.id = a.patient_id
+  WHERE p.email = ?
+        `;
+        db.query(
+          paymentQuery,
+          [amount, user_email],
+          (err, paymentResult) => {
+            if (err) {
+              console.error('Error inserting into payments table: ', err);
+              return res
+                .status(500)
+                .json({ message: 'Error saving payment details.' });
+            }
+
+            console.log('Payment details saved successfully.');
+          }
+        );
+      
+          
         }
 
         // Email notification
@@ -801,6 +946,29 @@ app.post('/admin/process-hmo-claim', (req, res) => {
                               .json({ message: 'Error generating receipt.' })
                           }
 
+                          // Insert into payments table
+          const paymentQuery = `
+          INSERT INTO payments (name, email, unit, problem_description, amount_paid, time_completed)
+  SELECT p.name, p.email, a.unit, a.problem_description, ?, NOW()
+  FROM patients p
+  JOIN appointments a ON p.id = a.patient_id
+  WHERE p.email = ?
+        `;
+        db.query(
+          paymentQuery,
+          [amount, patient_email],
+          (err, paymentResult) => {
+            if (err) {
+              console.error('Error inserting into payments table: ', err);
+              return res
+                .status(500)
+                .json({ message: 'Error saving payment details.' });
+            }
+
+            console.log('Payment details saved successfully.');
+          }
+        );
+
                           // Step 8: Update the HMO Request Status to "Processed"
                           db.query(
                             "UPDATE HMO_Requests SET request_status = 'Processed' WHERE request_id = ?",
@@ -879,69 +1047,66 @@ app.get('/admin/hmo-requests', (req, res) => {
 
 // API to fetch user details for Account Summary
 app.get('/user/account-summary', (req, res) => {
-  const userEmail = req.query.email
+  const userEmail = req.query.email;
 
   if (!userEmail) {
-    return res.status(400).json({ message: 'Email is required.' })
+    return res.status(400).json({ message: 'Email is required.' });
   }
 
   const query = `
     SELECT 
-      users.id,  
-      users.name, 
-      users.email, 
-      COALESCE(SUM(receipts.amount), 0) AS total_payments, 
-      COALESCE(HMO_Plans.plan_name, 'Not Enrolled') AS hmo_plan
-    FROM users  
-    LEFT JOIN receipts ON users.email = receipts.user_email
-    LEFT JOIN HMO_Patients ON users.email = HMO_Patients.patient_email
-    LEFT JOIN HMO_Plans ON HMO_Patients.hmo_plan_id = HMO_Plans.hmo_plan_id
-    WHERE users.email = ?
-    GROUP BY users.id, users.name, users.email, HMO_Plans.plan_name
-  `
+      patients.id,  
+      patients.name, 
+      patients.email, 
+      COALESCE(SUM(receipts.amount), 0) AS total_payments
+    FROM patients  
+    LEFT JOIN receipts ON patients.email = receipts.user_email
+    WHERE patients.email = ?
+    GROUP BY patients.id, patients.name, patients.email
+  `;
 
   db.query(query, [userEmail], (err, results) => {
     if (err) {
-      console.error('Database error:', err)
+      console.error('Database error:', err);
       return res
         .status(500)
-        .json({ message: 'Error fetching account summary.' })
+        .json({ message: 'Error fetching account summary.' });
     }
 
     if (results.length === 0) {
-      return res.status(404).json({ message: 'User not found.' })
+      return res.status(404).json({ message: 'User not found.' });
     }
 
-    res.json(results[0]) // Return just the user's data
-  })
-})
+    res.json(results[0]); // Return just the user's data
+  });
+});
 
 // API to fetch recent transactions for User Overview
 app.get('/user/recent-transactions', (req, res) => {
-  const email = req.query.email
-  const limit = req.query.limit || 5 // Default to 5 transactions
+  const email = req.query.email;
+  const limit = req.query.limit || 5; // Default to 5 transactions
 
   if (!email) {
-    return res.status(400).json({ message: 'User email is required.' })
+    return res.status(400).json({ message: 'User email is required.' });
   }
 
   // SQL query to fetch recent transactions
   const query =
-    'SELECT * FROM receipts WHERE user_email = ? ORDER BY created_at DESC LIMIT ?'
+    'SELECT * FROM receipts WHERE user_email = ? ORDER BY created_at DESC LIMIT ?';
 
   db.query(query, [email, limit], (err, results) => {
     if (err) {
-      return res.status(500).json({ message: 'Database error.' })
+      return res.status(500).json({ message: 'Database error.' });
     }
 
     if (results.length === 0) {
-      return res.json({ message: 'No recent transactions found.' })
+      return res.json({ message: 'No recent transactions found.' });
     }
 
     // Send back the transactions as a response
-    res.json(results)
-  })
-})
+    res.json(results);
+  });
+});
 
 // API to fetch summary for Admin Overview
 app.get('/admin/overview-stats', (req, res) => {
@@ -1010,38 +1175,6 @@ app.get('/admin/overview-stats', (req, res) => {
   })
 })
 
-// API to fetching data for charts for the admin overview
-/*app.get('/admin/payments-daily-summary', (req, res) => {
-  const query =
-    'SELECT DATE(created_at) AS payment_date, SUM(amount) AS total_amount FROM receipts WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 6 DAY) GROUP BY DATE(created_at) ORDER BY DATE(created_at);'
-
-  db.query(query, (err, results) => {
-    if (err) {
-      console.error('Error fetching chart data:', err)
-      return res.status(500).json({ message: 'chart data fetch failed' })
-    }
-
-    // Fill in missing days with 0
-    const today = new Date()
-    const days = Array.from({ length: 7 }, (_, i) => {
-      const d = new Date(today)
-      d.setDate(today.getDate() - (6 - i))
-      return d.toISOString().split('T')[0]
-    })
-
-    const data = days.map((day) => {
-      const match = results.find((r) => r.payment_data === day)
-      return {
-        date: day,
-        total: match ? match.total_amount : 0,
-      }
-    })
-
-    res.json(data)
-  })
-})*/
-
-
 // API to transactions with "Pending" status for receipts
 app.get('/check-pending-status/:user_email', (req, res) => {
   const userEmail = req.params.user_email
@@ -1067,17 +1200,21 @@ app.get('/check-pending-status/:user_email', (req, res) => {
 
 // API to fetch all transactions for the admin
 app.get('/admin/transactions', (req, res) => {
-  const query = 'SELECT u.name AS user_name, r.amount, r.payment_method, r.status, r.created_at FROM receipts r JOIN users u ON r.user_email = u.email ORDER BY r.created_at DESC';
+  const query = `
+    SELECT p.name AS patient_name, r.amount, r.payment_method, r.status, r.created_at 
+    FROM receipts r 
+    JOIN patients p ON r.user_email = p.email 
+    ORDER BY r.created_at DESC
+  `;
 
   db.query(query, (err, results) => {
     if (err) {
       console.error('Error fetching all transactions:', err);
-      return res.status(500).json({ message: 'Database error fetching transactions.'});
-
+      return res.status(500).json({ message: 'Database error fetching transactions.' });
     }
     res.json(results);
-  })
-})
+  });
+});
 
 // Start Server
 app.listen(port, () => {

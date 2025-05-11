@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import '../../styles/User/BankTransfer.css';
 
 const BankTransfer = () => {
@@ -9,6 +9,13 @@ const BankTransfer = () => {
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const email = queryParams.get('email'); // Get email from query parameters
+  const appointmentId = queryParams.get('appointmentId'); // Get appointmentId from query parameters
+
+  console.log('Email:', email);
+  console.log('Appointment ID:', appointmentId);
 
   useEffect(() => {
     axios
@@ -24,21 +31,15 @@ const BankTransfer = () => {
       return;
     }
 
-    const user_email = localStorage.getItem('userEmail');
-    if (!user_email) {
-      setMessage('User email not found. Please log in again.');
-      return;
-    }
-
     try {
       const response = await axios.post(
         'http://localhost:5000/user/initiate-bank-transfer',
-        { user_email, amount }
+        { user_email: email, amount } // Use the email from query parameters
       );
       setMessage(response.data.message);
 
       // Redirect to payment confirmation page
-      navigate(`/payment-confirmation/${user_email}`)
+      navigate(`/payment-confirmation/${email}`);
     } catch (err) {
       console.error('Bank transfer error: ', err.response?.data || err.message);
       setMessage('Bank transfer initialization failed.');
@@ -49,6 +50,8 @@ const BankTransfer = () => {
     <div className="bank-transfer-container">
       <div className="bank-transfer-card">
         <h2>Bank Transfer</h2>
+        <p>Email: {email}</p>
+        <p>Appointment ID: {appointmentId}</p>
         {bankDetails ? (
           <div className="bank-details">
             <p><strong>Bank Name:</strong> {bankDetails.bank_name}</p>

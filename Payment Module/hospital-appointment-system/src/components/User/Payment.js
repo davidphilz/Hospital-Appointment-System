@@ -2,12 +2,21 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { motion } from 'framer-motion'; // For smooth animations
 import { Loader } from 'lucide-react'; // Loading icon
+import { useLocation } from 'react-router-dom';
 import '../../styles/User/Payment.css';
 
 const Payment = () => {
   const [amount, setAmount] = useState(''); // Stores the payment amount
   const [error, setError] = useState(''); // Stores error messages
   const [loading, setLoading] = useState(false); // Tracks loading state for UX feedback
+
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const email = queryParams.get('email'); // Get email from query parameters
+  const appointmentId = queryParams.get('appointmentId'); // Get appointmentId from query parameters
+
+  console.log('Email:', email);
+  console.log('Appointment ID:', appointmentId);
 
   const handlePayment = async () => {
     if (!amount || parseFloat(amount) <= 0) {
@@ -17,25 +26,19 @@ const Payment = () => {
     setError('');
     setLoading(true); // Shows loading indicator
 
-    const userEmail = localStorage.getItem('userEmail'); // Retrieves user email from local storage
-    if (!userEmail) {
-      setError('User email not found. Please log in again.');
-      setLoading(false);
-      return;
-    }
-
     try {
-      const tx_ref = 'REF' + Date.now(); // Generates a unique transaction reference
+      const tx_ref = 'REF' + Date.now(); // Generate a unique transaction reference
       console.log('Initiating payment with tx_ref:', tx_ref);
 
       const response = await axios.post('http://localhost:5000/flutterwave/pay', {
         amount,
         currency: 'NGN',
-        email: userEmail,
+        email,
         tx_ref,
+        appointmentId,
       });
 
-      window.location.href = response.data.url; // Redirects user to the Flutterwave payment page
+      window.location.href = response.data.url; // Redirect to Flutterwave payment page
     } catch (err) {
       console.error('Payment error:', err.response?.data || err.message);
       setError('Payment initiation failed. Please try again.');
@@ -72,6 +75,10 @@ const Payment = () => {
         >
           {loading ? <Loader className="loading-icon" /> : 'Proceed with Payment'}
         </motion.button>
+        <div>
+          <p>Email: {email}</p>
+          <p>Appointment ID: {appointmentId}</p>
+        </div>
       </motion.div>
     </motion.div>
   );

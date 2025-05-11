@@ -1,0 +1,89 @@
+/* General styling for the transaction history page */
+.admin-transaction-history {
+    padding: 20px;
+    font-family: Arial, sans-serif;
+    background-color: #f9f9f9; /* Light background for the page */
+}
+
+.admin-transaction-history h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #1976d2; /* Primary theme color */
+    font-size: 24px;
+    font-weight: bold;
+}
+
+/* Styling for the table container to make it scrollable */
+.admin-transaction-history table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0 auto;
+    overflow-x: auto;
+    display: block; /* Makes the table scrollable horizontally */
+    max-height: 500px; /* Set a max height for the table */
+    overflow-y: auto; /* Enable vertical scrolling */
+    background-color: #ffffff; /* White background for the table */
+    border: 1px solid #ddd; /* Light border around the table */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow for the table */
+}
+
+/* Styling for table headers */
+.admin-transaction-history table thead {
+    background-color: #1976d2; /* Primary theme color */
+    position: sticky;
+    top: 0; /* Keeps the header fixed when scrolling */
+    z-index: 1;
+}
+
+.admin-transaction-history table th {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 2px solid #ddd;
+    font-weight: bold;
+    color: #ffffff; /* White text for the header */
+    text-transform: uppercase; /* Make header text uppercase */
+}
+
+/* Styling for table rows */
+.admin-transaction-history table td {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+    color: #333; /* Dark gray text for table rows */
+    text-align: center;
+}
+
+.admin-transaction-history table tr:nth-child(even) {
+    background-color: #f4f4f4; /* Light gray for alternating rows */
+}
+
+.admin-transaction-history table tr:hover {
+    background-color: #e3f2fd; /* Light blue hover effect */
+}
+
+/* Styling for error and loading messages */
+.admin-transaction-history .error {
+    color: #d32f2f; /* Red for error messages */
+    text-align: center;
+    margin-top: 20px;
+    font-weight: bold;
+}
+
+.admin-transaction-history p {
+    text-align: center;
+    color: #666; /* Neutral gray for general text */
+}
+
+/* Styling for buttons (if any are added later) */
+.admin-transaction-history button {
+    padding: 8px 12px;
+    background-color: #1976d2; /* Primary theme color */
+    color: #ffffff; /* White text */
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.admin-transaction-history button:hover {
+    background-color: #1258a7; /* Darker blue for hover effect */
+}

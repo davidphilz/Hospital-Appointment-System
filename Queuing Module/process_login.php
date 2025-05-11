@@ -15,9 +15,10 @@ if (mysqli_num_rows($result) == 1) {
 
     // Check password
     if (password_verify($password, $user['password'])) {
-        // Set session
-        $_SESSION['id'] = $user['id']; // Changed to 'id' to match index.php
+        // Set session variables
+        $_SESSION['patient_id'] = $user['id'];
         $_SESSION['patient_name'] = $user['name'];
+        $_SESSION['email'] = $user['email']; // Add this line to set the email in the session
 
         // Redirect to patient dashboard
         header("Location: /Hospital-Appointment-System/Queuing%20Module/dashboard/index.php");

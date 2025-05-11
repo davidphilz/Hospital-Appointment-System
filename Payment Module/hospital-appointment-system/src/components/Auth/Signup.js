@@ -30,7 +30,7 @@ const Signup = () => {
       const url =
         role === 'admin'
           ? 'http://localhost:5000/admin/register'
-          : 'http://localhost:5000/user/register'
+          : 'http://localhost:5000/patient/register'; // Updated to use 'patient/register'
 
       const response = await axios.post(url, data)
 

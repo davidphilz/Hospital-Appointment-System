@@ -1,5 +1,5 @@
 .payment-history-container {
-    max-width: 800px;
+    max-width: 1000px; /* Increased width for better visibility */
     margin: 40px auto;
     padding: 20px;
     font-family: Arial, sans-serif;
@@ -8,24 +8,53 @@
 .payment-history-container h2 {
     text-align: center;
     margin-bottom: 20px;
+    color: #333;
 }
 
+/* Styling for the table container to make it scrollable */
 .payment-history-table {
     width: 100%;
     border-collapse: collapse;
+    margin: 0 auto;
+    overflow-x: auto;
+    display: block; /* Makes the table scrollable horizontally */
+    max-height: 500px; /* Set a max height for the table */
+    overflow-y: auto; /* Enable vertical scrolling */
 }
 
-.payment-history-table th,
-.payment-history-table td {
-    border: 1px solid #ccc;
-    padding: 10px;;
-    text-align: center;
+/* Styling for table headers */
+.payment-history-table thead {
+    background-color: #f4f4f4;
+    position: sticky;
+    top: 0; /* Keeps the header fixed when scrolling */
+    z-index: 1;
 }
 
 .payment-history-table th {
-    background-color: #f2f2f2;
+    padding: 10px;
+    text-align: left;
+    border-bottom: 2px solid #ddd;
+    font-weight: bold;
+    color: #555;
 }
 
+/* Styling for table rows */
+.payment-history-table td {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+    color: #333;
+    text-align: center;
+}
+
+.payment-history-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.payment-history-table tr:hover {
+    background-color: #f1f1f1;
+}
+
+/* Styling for the "View Receipt Details" button */
 .payment-history-table button {
     padding: 5px 10px;
     background-color: #1976d2;
@@ -38,4 +67,16 @@
 
 .payment-history-table button:hover {
     background-color: #1258a7;
+}
+
+/* Styling for error and loading messages */
+.payment-history .error {
+    color: red;
+    text-align: center;
+    margin-top: 20px;
+}
+
+.payment-history p {
+    text-align: center;
+    color: #666;
 }

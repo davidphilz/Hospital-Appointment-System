@@ -1,27 +1,30 @@
 import React, { useState } from 'react';
-import axios from 'axios'; // Used for API requests
+import axios from 'axios';
+import { useNavigate, useLocation } from 'react-router-dom';
 import '../../styles/User/CashPayment.css';
-import { useNavigate } from 'react-router-dom';
 
 const CashPayment = () => {
-  const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [amount, setAmount] = useState('');
   const [message, setMessage] = useState('');
   const navigate = useNavigate();
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const email = queryParams.get('email'); // Get email from query parameters
+  const appointmentId = queryParams.get('appointmentId'); // Get appointmentId from query parameters
 
-  // Function to handle cash payment submission
+  console.log('Email:', email);
+  console.log('Appointment ID:', appointmentId);
+
   const handleCashPayment = async (e) => {
     e.preventDefault();
 
-    // Validate inputs
     if (!email || !phone || !amount) {
       setMessage('All fields are required');
       return;
     }
 
     try {
-      // Send payment request to backend
       const response = await axios.post('http://localhost:5000/user/cash-payment', {
         email,
         phone,
@@ -43,12 +46,7 @@ const CashPayment = () => {
       {message && <p className="message">{message}</p>}
       <form onSubmit={handleCashPayment}>
         <label>Email:</label>
-        <input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
+        <input type="email" value={email} readOnly />
 
         <label>Phone Number:</label>
         <input
