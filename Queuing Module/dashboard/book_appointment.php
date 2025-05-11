@@ -1,19 +1,27 @@
 <?php
+session_set_cookie_params([
+    'path'     => '/',
+    'httponly' => true,
+    'samesite' => 'Lax',
+]);
 session_start();
-if (!isset($_SESSION['id'])) {
-    header("Location: /Hospital-Appointment-System/Queuing Module/auth/login.php");
+
+if (!isset($_SESSION['patient_id'])) {
+    header("Location: /Hospital-Appointment-System/Queuing%20Module/auth/login.php");
     exit();
 }
 
-include('../includes/db.php'); // Database connection
+include __DIR__ . '/../includes/db.php';
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $patient_id = $_SESSION['id'];
+$problem_description = '';
+$urgency = '';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $patient_id = (int) $_SESSION['patient_id'];
     $problem_description = mysqli_real_escape_string($conn, $_POST['problem_description']);
     $urgency = mysqli_real_escape_string($conn, $_POST['urgency']);
 
-    // Match keywords to department
-    $unit = ''; // No default, ensure a match
+    $unit = '';
     if (stripos($problem_description, 'skin') !== false) {
         $unit = 'Dermatology';
     } elseif (stripos($problem_description, 'heart') !== false) {
@@ -38,65 +46,75 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $unit = 'Oncology';
     } elseif (stripos($problem_description, 'pregnancy') !== false) {
         $unit = 'Obstetrics';
-    } elseif (stripos($problem_description, 'child') !== false) {
+    } elseif (stripos($problem_description, 'child') !== false || stripos($problem_description, 'kid') !== false) {
         $unit = 'Pediatrics';
-    } elseif (stripos($problem_description, 'mental') !== false || stripos($problem_description, 'depression') !== false) {
+    } elseif (
+        stripos($problem_description, 'mental') !== false ||
+        stripos($problem_description, 'depression') !== false ||
+        stripos($problem_description, 'anxiety') !== false ||
+        stripos($problem_description, 'stress') !== false
+    ) {
         $unit = 'Psychiatry';
-    }
-
-    if ($unit === '') {
-        echo "<script>alert('Unable to identify department. Please provide more specific details.'); history.back();</script>";
-        exit();
-    }
-
-    // Determine next appointment slot
-    $last_appointment_query = "SELECT appointment_date FROM appointments 
-                               WHERE unit = '$unit' AND status = 'pending' 
-                               ORDER BY appointment_date DESC LIMIT 1";
-    $last_appointment_result = mysqli_query($conn, $last_appointment_query);
-
-    if (mysqli_num_rows($last_appointment_result) > 0) {
-        $last_appointment = mysqli_fetch_assoc($last_appointment_result);
-        $last_appointment_date = new DateTime($last_appointment['appointment_date']);
-        $next_appointment_date = $last_appointment_date->add(new DateInterval('PT30M'));
     } else {
-        $next_appointment_date = new DateTime();
-        $next_appointment_date->add(new DateInterval('PT5H'));
+        // Automatically assign to General Medicine if no match
+        $unit = 'General Medicine';
     }
 
-    $formatted_appointment_date = $next_appointment_date->format('Y-m-d H:i:s');
+    // Determine next appointment
+    $last_q = "
+        SELECT appointment_date 
+        FROM appointments 
+        WHERE unit = '$unit' AND status = 'pending' 
+        ORDER BY appointment_date DESC 
+        LIMIT 1
+    ";
+    $last_r = mysqli_query($conn, $last_q);
 
-    // Insert into DB
-    $sql = "INSERT INTO appointments (patient_id, problem_description, unit, priority_level, status, appointment_date) 
-            VALUES ('$patient_id', '$problem_description', '$unit', '$urgency', 'pending', '$formatted_appointment_date')";
+    if (mysqli_num_rows($last_r) > 0) {
+        $last_row = mysqli_fetch_assoc($last_r);
+        $last_dt = new DateTime($last_row['appointment_date']);
+        $next_dt = $last_dt->add(new DateInterval('PT30M'));
+    } else {
+        $next_dt = (new DateTime())->add(new DateInterval('PT5H'));
+    }
+
+    $formatted_appointment_date = $next_dt->format('Y-m-d H:i:s');
+
+    $sql = "
+      INSERT INTO appointments 
+        (patient_id, problem_description, unit, priority_level, status, appointment_date) 
+      VALUES 
+        ('$patient_id', '$problem_description', '$unit', '$urgency', 'pending', '$formatted_appointment_date')
+    ";
 
     if (mysqli_query($conn, $sql)) {
-        // Update the total patient count in session
-        $total_patient_query = "SELECT COUNT(*) AS total FROM appointments";
-        $total_patient_result = mysqli_query($conn, $total_patient_query);
-        $total_patient_data = mysqli_fetch_assoc($total_patient_result);
-        $_SESSION['total_patient'] = $total_patient_data['total'];
+        $tot_q = "SELECT COUNT(*) AS total FROM appointments";
+        $tot_r = mysqli_query($conn, $tot_q);
+        $tot_d = mysqli_fetch_assoc($tot_r);
+        $_SESSION['total_patient'] = $tot_d['total'];
 
-        echo "<script>alert('Appointment booked successfully! Scheduled for $formatted_appointment_date.'); window.location.href = 'index.php';</script>";
+        echo "<script>
+                alert('Appointment booked successfully! Scheduled for $formatted_appointment_date.');
+                window.location.href = 'index.php';
+              </script>";
+        exit();
     } else {
         echo "Error: " . mysqli_error($conn);
+        exit();
     }
 }
 ?>
-
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="utf-8">
     <title>Book Appointment</title>
     <style>
-        * {
-            box-sizing: border-box;
-        }
+        * { box-sizing: border-box; }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: #f0f2f5;
-            margin: 0;
-            padding: 0;
+            margin: 0; padding: 0;
         }
         .form-container {
             max-width: 600px;
@@ -107,67 +125,41 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             box-shadow: 0 5px 25px rgba(0,0,0,0.1);
             overflow: hidden;
         }
-        h2 {
-            margin-bottom: 20px;
-            color: #333;
-            text-align: center;
+        h2 { margin-bottom: 20px; color: #333; text-align: center; }
+        .form-group { margin-bottom: 20px; }
+        label { font-weight: 600; margin-bottom: 8px; display: block; color: #555; }
+        textarea, select {
+            width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px;
+            resize: vertical; font-size: 15px;
         }
-        .form-group {
-            margin-bottom: 20px;
-        }
-        label {
-            font-weight: 600;
-            margin-bottom: 8px;
-            display: block;
-            color: #555;
-        }
-        input, textarea, select {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            resize: vertical;
-            font-size: 15px;
-        }
-        textarea {
-            min-height: 100px;
-        }
+        textarea { min-height: 100px; }
         button {
-            width: 100%;
-            padding: 12px;
-            background-color: #2a2b38;
-            color: white;
-            font-size: 16px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: background 0.3s;
+            width: 100%; padding: 12px; background-color: #2a2b38;
+            color: white; font-size: 16px; border: none; border-radius: 8px;
+            cursor: pointer; transition: background 0.3s;
         }
-        button:hover {
-            background-color: #444;
-        }
+        button:hover { background-color: #444; }
     </style>
 </head>
 <body>
-
 <div class="form-container">
     <h2>Book an Appointment</h2>
-    <form method="POST" action="">
+    <form method="POST">
         <div class="form-group">
             <label for="problem_description">Describe Your Problem:</label>
-            <textarea id="problem_description" name="problem_description" required></textarea>
+            <textarea id="problem_description" name="problem_description" required><?= htmlspecialchars($problem_description ?? '') ?></textarea>
         </div>
         <div class="form-group">
             <label for="urgency">Select Urgency Level:</label>
             <select id="urgency" name="urgency" required>
-                <option value="Emergency">Emergency</option>
-                <option value="High">High</option>
-                <option value="Normal">Normal</option>
+                <option value="Emergency" <?= ($urgency === 'Emergency') ? 'selected' : '' ?>>Emergency</option>
+                <option value="High" <?= ($urgency === 'High') ? 'selected' : '' ?>>High</option>
+                <option value="Normal" <?= ($urgency === 'Normal') ? 'selected' : '' ?>>Normal</option>
             </select>
         </div>
+        <!-- The department override has been disabled since it's now automatic -->
         <button type="submit">Book Appointment</button>
     </form>
 </div>
-
 </body>
 </html>
