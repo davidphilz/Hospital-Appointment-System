@@ -235,7 +235,7 @@ if (!isset($_SESSION['staff_name'])) {
           <h3>Alert</h3>
           <ul class="list-group mb-4">
             <?php
-            $stmt = $pdo->prepare("SELECT * FROM alerts ORDER BY created_at DESC LIMIT 5");
+            $stmt = $pdo->prepare("SELECT * FROM alert ORDER BY created_at DESC LIMIT 5");
             $stmt->execute();
             while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                 echo '<li class="list-group-item d-flex justify-content-between align-items-center">'

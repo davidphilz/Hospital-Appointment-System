@@ -26,7 +26,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $title   = trim($_POST["title"]);
     $message = trim($_POST["message"]);
 
-    $stmt = $conn->prepare("INSERT INTO alerts (title, message) VALUES (?, ?)");
+    $stmt = $conn->prepare("INSERT INTO alert (title, message) VALUES (?, ?)");
     $stmt->bind_param("ss", $title, $message);
 
     if ($stmt->execute()) {
