@@ -191,7 +191,7 @@ $feedback_result = $query_feedback->get_result();
         <!-- Main content -->
         <div class="col-md-10">
             <div class="container mt-5">
-                <h3 class="text-center">Welcome, Dr. <?php echo htmlspecialchars($_SESSION['doctor_name']); ?></h3>
+                <!-- <h3 class="text-center">Welcome, Dr. <?php echo htmlspecialchars($_SESSION['doctor_name']); ?></h3> -->
 
                 <!-- Upcoming Appointments -->
                 <div class="card mb-3">
